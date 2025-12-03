@@ -56,7 +56,7 @@ func (r *ResumeController) SaveResumeHandler(c *gin.Context) {
 // GenerateResumeHandler 根据原始文本生成简历
 func (r *ResumeController) GenerateResumeHandler(c *gin.Context) {
 	var request struct {
-		RawText string `json:"raw_text" binding:"required"`
+		Raw string `json:"raw" binding:"required"`
 	}
 
 	userID := c.Param("userID")
@@ -66,7 +66,7 @@ func (r *ResumeController) GenerateResumeHandler(c *gin.Context) {
 	}
 
 	// 调用服务层生成简历
-	resume, err := r.service.GenerateResume(context.Background(), request.RawText, userID)
+	resume, err := r.service.GenerateResume(context.Background(), request.Raw, userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
