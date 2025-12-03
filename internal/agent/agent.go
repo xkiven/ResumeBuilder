@@ -14,6 +14,7 @@ import (
 type AIAgent interface {
 	InitializeClient() (*arkruntime.Client, error)
 	ParseResume(ctx context.Context, client *arkruntime.Client, raw string) (*domain.Resume, error)
+	AnalyzeGitHubRepo(ctx context.Context, client *arkruntime.Client, repoURL string) (*domain.Project, error)
 }
 
 // 实现 AIAgent 接口的结构体
@@ -102,4 +103,53 @@ func (a *agent) ParseResume(ctx context.Context, client *arkruntime.Client, raw 
 	} else {
 		return nil, fmt.Errorf("No resume generated")
 	}
+}
+
+// 分析GitHub项目并返回Project结构体
+func (a *agent) AnalyzeGitHubRepo(ctx context.Context, client *arkruntime.Client, repoURL string) (*domain.Project, error) {
+	prompt := fmt.Sprintf(`
+	请分析GitHub仓库 %s，提取以下信息并以JSON格式返回（符合Project结构体）：
+	- name: 项目名称（从URL提取或推断）
+	- role: 留空（或填"开源项目"）
+	- description: 项目技术特点描述（专业语言）
+	- tech_stack: 核心技术栈列表（编程语言、框架、工具等）
+	- highlights: 3-5个技术亮点
+	
+	JSON格式示例：
+	{
+		"name": "xxx项目",
+		"role": "开源项目",
+		"description": "该项目基于...",
+		"tech_stack": ["Go", "Gin", "MySQL"],
+		"highlights": ["高性能...", "模块化设计..."]
+	}
+	`, repoURL)
+
+	req := model.CreateChatCompletionRequest{
+		Model: "doubao-seed-1-6-251015",
+		Messages: []*model.ChatCompletionMessage{
+			{
+				Role: model.ChatMessageRoleUser,
+				Content: &model.ChatCompletionMessageContent{
+					ListValue: []*model.ChatCompletionMessageContentPart{
+						{Type: model.ChatCompletionMessageContentPartTypeText, Text: prompt},
+					},
+				},
+			},
+		},
+	}
+
+	resp, err := client.CreateChatCompletion(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("分析项目失败: %v", err)
+	}
+
+	if len(resp.Choices) > 0 && resp.Choices[0].Message.Content.StringValue != nil {
+		var project domain.Project
+		if err := json.Unmarshal([]byte(*resp.Choices[0].Message.Content.StringValue), &project); err != nil {
+			return nil, fmt.Errorf("解析结果失败: %v", err)
+		}
+		return &project, nil
+	}
+	return nil, fmt.Errorf("未生成分析结果")
 }

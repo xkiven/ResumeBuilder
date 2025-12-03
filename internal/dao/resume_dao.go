@@ -26,7 +26,7 @@ type resumeDAO struct {
 }
 
 func NewResumeDAO() ResumeDAO {
-	dbUrl := "root:xkw510724@tcp(127.0.0.1:3306)/resume_builder?charset=utf8"
+	dbUrl := "root:xkw510724@tcp(127.0.0.1:3306)/resume_builder?charset=utf8&parseTime=true&loc=Local"
 	db, err := gorm.Open(mysql.Open(dbUrl), &gorm.Config{
 		NamingStrategy: schema.NamingStrategy{
 			SingularTable: true,
