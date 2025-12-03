@@ -25,7 +25,7 @@ type resumeDAO struct {
 	redis *redis.Client
 }
 
-func InitDB() ResumeDAO {
+func NewResumeDAO() ResumeDAO {
 	dbUrl := "root:xkw510724@tcp(127.0.0.1:3306)/resume_builder?charset=utf8"
 	db, err := gorm.Open(mysql.Open(dbUrl), &gorm.Config{
 		NamingStrategy: schema.NamingStrategy{
@@ -49,13 +49,6 @@ func InitDB() ResumeDAO {
 	return &resumeDAO{
 		db:    db,
 		redis: client,
-	}
-}
-
-func NewResumeDAO(db *gorm.DB, redis *redis.Client) ResumeDAO {
-	return &resumeDAO{
-		db:    db,
-		redis: redis,
 	}
 }
 

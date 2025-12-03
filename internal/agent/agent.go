@@ -10,12 +10,24 @@ import (
 	"os"
 )
 
+// AIAgent 是我们自己定义的接口，包含初始化客户端和解析简历的方法
 type AIAgent interface {
 	InitializeClient() (*arkruntime.Client, error)
 	ParseResume(ctx context.Context, client *arkruntime.Client, raw string) (*domain.Resume, error)
 }
 
-func InitializeClient() (*arkruntime.Client, error) {
+// 实现 AIAgent 接口的结构体
+type agent struct {
+	client *arkruntime.Client
+}
+
+// NewAIAgent 返回一个实现 AIAgent 接口的 agent 对象
+func NewAIAgent() AIAgent {
+	return &agent{}
+}
+
+// InitializeClient 实现 AIAgent 接口的 InitializeClient 方法
+func (a *agent) InitializeClient() (*arkruntime.Client, error) {
 	// 从环境变量获取 API Key
 	apiKey := os.Getenv("apiKey")
 	if apiKey == "" {
@@ -28,10 +40,14 @@ func InitializeClient() (*arkruntime.Client, error) {
 		arkruntime.WithBaseUrl("https://ark.cn-beijing.volces.com/api/v3"),
 	)
 
-	return client, nil
+	// 将客户端保存到结构体中
+	a.client = client
+
+	return a.client, nil
 }
 
-func ParseResume(ctx context.Context, client *arkruntime.Client, raw string) (*domain.Resume, error) {
+// ParseResume 实现 AIAgent 接口的 ParseResume 方法
+func (a *agent) ParseResume(ctx context.Context, client *arkruntime.Client, raw string) (*domain.Resume, error) {
 
 	// 构建简历生成的提示文本，要求生成结构化 JSON 简历
 	prompt := fmt.Sprintf(`
