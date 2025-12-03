@@ -5,6 +5,8 @@ import (
 	"_ResumeBuilder/internal/model"
 	"context"
 	"encoding/json"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm/schema"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -21,6 +23,33 @@ type ResumeDAO interface {
 type resumeDAO struct {
 	db    *gorm.DB
 	redis *redis.Client
+}
+
+func InitDB() ResumeDAO {
+	dbUrl := "root:xkw510724@tcp(127.0.0.1:3306)/resume_builder?charset=utf8"
+	db, err := gorm.Open(mysql.Open(dbUrl), &gorm.Config{
+		NamingStrategy: schema.NamingStrategy{
+			SingularTable: true,
+		},
+	})
+	if err != nil {
+		panic(err)
+	}
+	err = db.AutoMigrate(model.ResumeModel{})
+	if err != nil {
+		panic(err)
+	}
+
+	client := redis.NewClient(&redis.Options{
+		Addr:     "127.0.0.1:6379",
+		Password: "",
+		DB:       0,
+	})
+
+	return &resumeDAO{
+		db:    db,
+		redis: client,
+	}
 }
 
 func NewResumeDAO(db *gorm.DB, redis *redis.Client) ResumeDAO {

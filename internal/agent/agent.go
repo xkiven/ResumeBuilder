@@ -8,3 +8,7 @@ import (
 type AIAgent interface {
 	ParseResume(ctx context.Context, raw string) (*domain.Resume, error)
 }
+
+func ParseResume(ctx context.Context, raw string) (*domain.Resume, error) {
+
+}
