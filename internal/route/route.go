@@ -11,6 +11,7 @@ func Run(resumeController *controller.ResumeController) *gin.Engine {
 	r.POST("/resume", resumeController.SaveResumeHandler)
 	r.POST("/resume/:userID/generate", resumeController.GenerateResumeHandler)
 	r.DELETE("/resume/:userID", resumeController.DeleteResumeHandler)
+	r.POST("/resume/:userID/generate/github", resumeController.AddGitHubProjectHandler)
 
 	return r
 }

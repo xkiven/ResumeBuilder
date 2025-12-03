@@ -88,3 +88,23 @@ func (r *ResumeController) DeleteResumeHandler(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Resume deleted successfully"})
 }
+
+// AddGitHubProjectHandler 分析GitHub项目并添加到用户简历
+func (r *ResumeController) AddGitHubProjectHandler(c *gin.Context) {
+	var req struct {
+		RepoURL string `json:"repo_url" binding:"required,url"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的仓库地址"})
+		return
+	}
+
+	userID := c.Param("userID")
+	resume, err := r.service.AnalyzeAndAddGitHubProject(context.Background(), userID, req.RepoURL)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, resume)
+}
