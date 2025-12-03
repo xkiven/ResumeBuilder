@@ -11,6 +11,7 @@ import (
 )
 
 type AIAgent interface {
+	InitializeClient() (*arkruntime.Client, error)
 	ParseResume(ctx context.Context, client *arkruntime.Client, raw string) (*domain.Resume, error)
 }
 

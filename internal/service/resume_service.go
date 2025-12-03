@@ -50,7 +50,12 @@ func (s *resumeService) GenerateResume(ctx context.Context, raw string, userID s
 		return nil, errors.New("raw text cannot be empty")
 	}
 
-	resume, err := s.agent.ParseResume(ctx, raw)
+	aiClient, err := s.agent.InitializeClient()
+	if err != nil {
+		panic(err)
+	}
+
+	resume, err := s.agent.ParseResume(ctx, aiClient, raw)
 	if err != nil {
 		return nil, err
 	}
