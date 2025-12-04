@@ -2,6 +2,7 @@ package agent
 
 import (
 	"_ResumeBuilder/internal/domain"
+	"_ResumeBuilder/internal/utils"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -105,10 +106,22 @@ func (a *agent) ParseResume(ctx context.Context, client *arkruntime.Client, raw 
 	}
 }
 
-// 分析GitHub项目并返回Project结构体
+// AnalyzeGitHubRepo 分析GitHub项目并返回Project结构体
 func (a *agent) AnalyzeGitHubRepo(ctx context.Context, client *arkruntime.Client, repoURL string) (*domain.Project, error) {
+
+	var fileContent string
+	//fileURL := "https://github.com/xkiven/im/blob/main/README.md" // 目标文件URL
+	token := os.Getenv("GITHUB_TOKEN") // 从环境变量获取认证token（公开文件可留空）
+
+	// 尝试获取文件，失败不阻断流程（仅警告）
+	fileContent, err := utils.FetchFile(ctx, repoURL, token)
+	if err != nil {
+		fmt.Printf("警告：获取文件失败（非致命错误）：%v\n", err)
+		fileContent = "" // 为空时不影响后续处理
+	}
+
 	prompt := fmt.Sprintf(`
-	请分析GitHub仓库 %s，提取以下信息并以JSON格式返回（符合Project结构体）：
+	请分析GitHub仓库中的文件内容（README.md）%s，提取以下信息并以JSON格式返回（符合Project结构体）
 	- name: 项目名称（从URL提取或推断）
 	- role: 留空（或填"开源项目"）
 	- description: 项目技术特点描述（专业语言）
@@ -123,7 +136,7 @@ func (a *agent) AnalyzeGitHubRepo(ctx context.Context, client *arkruntime.Client
 		"tech_stack": ["Go", "Gin", "MySQL"],
 		"highlights": ["高性能...", "模块化设计..."]
 	}
-	`, repoURL)
+	`, fileContent)
 
 	req := model.CreateChatCompletionRequest{
 		Model: "doubao-seed-1-6-251015",
