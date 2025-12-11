@@ -1,11 +1,11 @@
 package main
 
 import (
-	"_ResumeBuilder/internal/agent"
-	"_ResumeBuilder/internal/controller"
-	"_ResumeBuilder/internal/dao"
-	"_ResumeBuilder/internal/route"
-	"_ResumeBuilder/internal/service"
+	"ResumeBuilder/internal/agent"
+	"ResumeBuilder/internal/controller"
+	"ResumeBuilder/internal/dao"
+	"ResumeBuilder/internal/route"
+	"ResumeBuilder/internal/service"
 	"log"
 )
 

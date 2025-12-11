@@ -1,7 +1,7 @@
 package route
 
 import (
-	"_ResumeBuilder/internal/controller"
+	"ResumeBuilder/internal/controller"
 	"github.com/gin-gonic/gin"
 )
 

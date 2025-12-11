@@ -1,8 +1,8 @@
 package dao
 
 import (
-	"_ResumeBuilder/internal/domain"
-	"_ResumeBuilder/internal/model"
+	"ResumeBuilder/internal/domain"
+	"ResumeBuilder/internal/model"
 	"context"
 	"encoding/json"
 	"gorm.io/driver/mysql"

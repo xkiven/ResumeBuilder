@@ -1,8 +1,8 @@
 package controller
 
 import (
-	"_ResumeBuilder/internal/domain"
-	"_ResumeBuilder/internal/service"
+	"ResumeBuilder/internal/domain"
+	"ResumeBuilder/internal/service"
 	"context"
 	"github.com/gin-gonic/gin"
 

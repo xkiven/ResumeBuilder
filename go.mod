@@ -1,4 +1,4 @@
-module _ResumeBuilder
+module ResumeBuilder
 
 go 1.24.7
 

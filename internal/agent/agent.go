@@ -1,8 +1,8 @@
 package agent
 
 import (
-	"_ResumeBuilder/internal/domain"
-	"_ResumeBuilder/internal/utils"
+	"ResumeBuilder/internal/domain"
+	"ResumeBuilder/internal/utils"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -68,7 +68,7 @@ func (a *agent) ParseResume(ctx context.Context, client *arkruntime.Client, raw 
 
 	// 构建请求
 	req := model.CreateChatCompletionRequest{
-		Model: "doubao-seed-1-6-251015",
+		Model: "doubao-1-5-pro-32k-250115",
 		Messages: []*model.ChatCompletionMessage{
 			{
 				Role: model.ChatMessageRoleUser,
@@ -126,7 +126,7 @@ func (a *agent) AnalyzeGitHubRepo(ctx context.Context, client *arkruntime.Client
 	- role: 留空（或填"开源项目"）
 	- description: 项目技术特点描述（专业语言）
 	- tech_stack: 核心技术栈列表（编程语言、框架、工具等）
-	- highlights: 3-5个技术亮点
+	- highlights: 3-5个技术亮点，技术亮点使用STAR法则完成，不需要把star这几个字母写出来，但是按照这个法则写
 	
 	JSON格式示例：
 	{
@@ -139,7 +139,7 @@ func (a *agent) AnalyzeGitHubRepo(ctx context.Context, client *arkruntime.Client
 	`, fileContent)
 
 	req := model.CreateChatCompletionRequest{
-		Model: "doubao-seed-1-6-251015",
+		Model: "doubao-1-5-pro-32k-250115",
 		Messages: []*model.ChatCompletionMessage{
 			{
 				Role: model.ChatMessageRoleUser,

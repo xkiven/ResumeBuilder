@@ -1,9 +1,9 @@
 package service
 
 import (
-	"_ResumeBuilder/internal/agent"
-	"_ResumeBuilder/internal/dao"
-	"_ResumeBuilder/internal/domain"
+	"ResumeBuilder/internal/agent"
+	"ResumeBuilder/internal/dao"
+	"ResumeBuilder/internal/domain"
 	"context"
 	"errors"
 )
