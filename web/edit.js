@@ -799,12 +799,28 @@ async function exportPDF() {
     }
 }
 
+// 验证GitHub仓库URL格式
+function validateGitHubURL(url) {
+    // 匹配多种GitHub URL格式：
+    // - https://github.com/user/repo
+    // - https://github.com/user/repo/
+    // - https://github.com/user/repo/tree/branch
+    // - https://github.com/user/repo/blob/branch/file
+    const pattern = /^https?:\/\/(www\.)?github\.com\/[\w-]+\/[\w.-]+(?:\/(?:tree|blob)\/[\w.-]+.*)?$/;
+    return pattern.test(url);
+}
+
 // GitHub 项目分析
 async function addGitHubProject() {
     const repoURL = document.getElementById('githubURL').value.trim();
 
-    if (!repoURL || !repoURL.includes('github.com')) {
-        showToast('❌ 请输入有效的GitHub仓库链接', 'error');
+    if (!repoURL) {
+        showToast('❌ 请输入GitHub仓库链接', 'error');
+        return;
+    }
+
+    if (!validateGitHubURL(repoURL)) {
+        showToast('❌ 请输入有效的GitHub仓库链接（格式：https://github.com/用户名/仓库名）', 'error');
         return;
     }
 
@@ -814,12 +830,18 @@ async function addGitHubProject() {
     try {
         btn.disabled = true;
         btn.innerHTML = '⏳ AI 分析中...';
+
+        // 阶段1：获取README
+        showToast('📥 正在获取README.md...', 'info');
         showLoading(true);
 
         const response = await apiRequest(`${API_BASE_URL}/resume/${currentUserID}/generate/github`, {
             method: 'POST',
             body: JSON.stringify({ repo_url: repoURL }),
         });
+
+        // 阶段2：AI分析完成
+        showToast('🤖 AI分析完成，正在添加到简历...', 'info');
 
         // 从返回的简历数据中提取最新添加的项目
         if (response.projects && response.projects.length > 0) {

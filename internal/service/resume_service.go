@@ -6,6 +6,7 @@ import (
 	"ResumeBuilder/internal/domain"
 	"context"
 	"errors"
+	"strings"
 )
 
 type ResumeService interface {
@@ -116,6 +117,19 @@ func (s *resumeService) AnalyzeAndAddGitHubProject(ctx context.Context, userID, 
 	if !resumeExists {
 		// 若用户无简历，初始化一个新简历
 		resume = &domain.Resume{UserID: userID}
+	}
+
+	// 检查项目是否已存在（通过URL或名称）
+	normalizedURL := strings.TrimSuffix(strings.ToLower(repoURL), "/")
+	for _, p := range resume.Projects {
+		// 通过URL匹配（URL可能为空，需要判断）
+		if p.URL != "" && strings.TrimSuffix(strings.ToLower(p.URL), "/") == normalizedURL {
+			return nil, errors.New("该GitHub项目已存在于简历中（URL重复）")
+		}
+		// 通过项目名称匹配（名称相同且都非空）
+		if p.Name != "" && project.Name != "" && strings.EqualFold(p.Name, project.Name) {
+			return nil, errors.New("同名项目已存在于简历中")
+		}
 	}
 
 	// 将分析结果添加到Projects列表

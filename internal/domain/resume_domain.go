@@ -40,4 +40,5 @@ type Project struct {
 	Description string   `json:"description"`
 	TechStack   []string `json:"tech_stack"`
 	Highlights  []string `json:"highlights"`
+	URL         string   `json:"url,omitempty"` // 项目URL（可选）
 }

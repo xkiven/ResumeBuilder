@@ -6,6 +6,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
+
 	"github.com/volcengine/volcengine-go-sdk/service/arkruntime"
 	"github.com/volcengine/volcengine-go-sdk/service/arkruntime/model"
 	"os"
@@ -118,34 +120,91 @@ func (a *agent) ParseResume(ctx context.Context, client *arkruntime.Client, raw 
 // AnalyzeGitHubRepo 分析GitHub项目并返回Project结构体
 func (a *agent) AnalyzeGitHubRepo(ctx context.Context, client *arkruntime.Client, repoURL string) (*domain.Project, error) {
 
-	var fileContent string
-	//fileURL := "https://github.com/xkiven/im/blob/main/README.md" // 目标文件URL
 	token := os.Getenv("GITHUB_TOKEN") // 从环境变量获取认证token（公开文件可留空）
 
-	// 尝试获取文件，失败不阻断流程（仅警告）
-	fileContent, err := utils.FetchFile(ctx, repoURL, token)
+	var fileContent string
+	var err error
+	var repoMetadata *utils.GitHubRepoMetadata
+
+	// 策略1: 优先使用GitHub API获取README（更稳定，适合国内网络）
+	fmt.Printf("\n📥 正在通过GitHub API获取README...\n")
+	fileContent, err = utils.FetchREADMEViaAPI(ctx, repoURL, token)
+
+	// 策略2: 如果API失败，降级使用raw.githubusercontent.com
 	if err != nil {
-		fmt.Printf("警告：获取文件失败（非致命错误）：%v\n", err)
-		fileContent = "" // 为空时不影响后续处理
+		fmt.Printf("\n⚠️  GitHub API获取失败: %v\n", err)
+		fmt.Printf("📥 尝试使用raw.githubusercontent.com...\n")
+		fileContent, err = utils.FetchREADME(ctx, repoURL, token)
+		if err != nil {
+			fmt.Printf("\n⚠️  README获取失败: %v\n", err)
+			// 策略3: 尝试获取仓库元数据作为备选
+			fmt.Printf("📥 尝试获取仓库元数据作为备选...\n")
+			repoMetadata, err = utils.FetchRepoMetadata(ctx, repoURL, token)
+			if err != nil {
+				fmt.Printf("⚠️  元数据获取也失败: %v\n", err)
+				fileContent = ""
+			} else {
+				// 使用元数据构建简单的描述
+				fileContent = fmt.Sprintf(`# %s
+
+%s
+
+**主要语言:** %s
+**Stars:** %d
+**Forks:** %d
+**Topics:** %v
+
+仓库地址: %s
+`, repoMetadata.Name, repoMetadata.Description, repoMetadata.Language,
+					repoMetadata.Stars, repoMetadata.Forks, repoMetadata.Topics, repoURL)
+				fmt.Printf("✓ 使用仓库元数据生成描述 (%d字符)\n", len(fileContent))
+			}
+		} else {
+			fmt.Printf("✓ raw URL获取README成功\n")
+		}
+	} else {
+		fmt.Printf("✓ GitHub API获取README成功\n")
 	}
 
 	prompt := fmt.Sprintf(`
-	请分析GitHub仓库中的文件内容（README.md）%s，提取以下信息并以JSON格式返回（符合Project结构体）
-	- name: 项目名称（从URL提取或推断）
-	- role: 留空（或填"开源项目"）
-	- description: 项目技术特点描述（专业语言）
-	- tech_stack: 核心技术栈列表（编程语言、框架、工具等）
-	- highlights: 3-5个技术亮点，技术亮点使用STAR法则完成，不需要把star这几个字母写出来，但是按照这个法则写
-	
-	JSON格式示例：
-	{
-		"name": "xxx项目",
-		"role": "开源项目",
-		"description": "该项目基于...",
-		"tech_stack": ["Go", "Gin", "MySQL"],
-		"highlights": ["高性能...", "模块化设计..."]
-	}
-	`, fileContent)
+请深度分析以下GitHub项目的README.md，提取技术信息用于简历展示。
+
+【项目URL】%s
+
+【README内容】
+%s
+
+【分析要求】
+1. name: 从URL或README提取项目名称（简洁明确）
+2. role: 填写"开源项目"或"个人项目"
+3. description: 100字以内的技术描述，突出架构设计和技术创新点
+4. tech_stack: 完整技术栈列表（包括：编程语言、框架、数据库、中间件、部署工具等）
+5. highlights: 3-5个技术亮点，每个亮点按STAR法则组织（不要写出S/T/A/R字母）：
+   - 背景场景（Situation）：项目面临的技术挑战或业务需求
+   - 任务目标（Task）：需要解决的具体技术问题
+   - 采取方案（Action）：使用的技术方案、架构设计或优化手段
+   - 达成效果（Result）：量化的性能提升、问题解决效果或业务价值
+   示例："面对高并发访问需求，采用Redis缓存+分布式锁机制优化数据访问，使系统QPS从500提升至5000，响应时间降低80%%"
+
+【JSON输出格式】（严格按照此格式，不要添加任何markdown标记）
+{
+	"name": "项目名称",
+	"role": "开源项目",
+	"description": "技术架构描述",
+	"tech_stack": ["技术1", "技术2", "技术3"],
+	"highlights": [
+		"亮点1（STAR格式）",
+		"亮点2（STAR格式）",
+		"亮点3（STAR格式）"
+	],
+	"url": "%s"
+}
+
+注意：
+- 只返回JSON，不要添加markdown代码块标记
+- highlights必须体现技术深度和量化效果
+- 如果README内容为空，请从URL推断项目基本信息
+`, repoURL, fileContent, repoURL)
 
 	req := model.CreateChatCompletionRequest{
 		Model: "doubao-1-5-pro-32k-250115",
@@ -168,10 +227,22 @@ func (a *agent) AnalyzeGitHubRepo(ctx context.Context, client *arkruntime.Client
 
 	if len(resp.Choices) > 0 && resp.Choices[0].Message.Content.StringValue != nil {
 		var project domain.Project
-		if err := json.Unmarshal([]byte(*resp.Choices[0].Message.Content.StringValue), &project); err != nil {
+		// 清理AI返回的JSON（移除markdown代码块标记）
+		cleanedJSON := cleanAIResponse(*resp.Choices[0].Message.Content.StringValue)
+		if err := json.Unmarshal([]byte(cleanedJSON), &project); err != nil {
 			return nil, fmt.Errorf("解析结果失败: %v", err)
 		}
 		return &project, nil
 	}
 	return nil, fmt.Errorf("未生成分析结果")
+}
+
+// cleanAIResponse 清理AI返回的JSON字符串，移除markdown代码块标记
+func cleanAIResponse(raw string) string {
+	// 移除markdown代码块标记
+	raw = strings.TrimSpace(raw)
+	raw = strings.TrimPrefix(raw, "```json")
+	raw = strings.TrimPrefix(raw, "```")
+	raw = strings.TrimSuffix(raw, "```")
+	return strings.TrimSpace(raw)
 }
