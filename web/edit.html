@@ -6,6 +6,7 @@
     <title>编辑简历 - 智能简历生成器</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="edit.css">
+    <link rel="stylesheet" href="resume-templates.css">
 </head>
 <body>
     <!-- 粒子背景动画 -->
@@ -61,12 +62,26 @@
         <div class="edit-layout">
             <!-- 左侧：简历预览 -->
             <div class="preview-panel">
-                <div class="panel-header">
-                    <h2>📄 简历预览</h2>
-                    <div class="preview-controls">
-                        <button type="button" id="zoomInBtn" class="icon-btn" title="放大">🔍+</button>
-                        <button type="button" id="zoomOutBtn" class="icon-btn" title="缩小">🔍-</button>
-                        <button type="button" id="resetZoomBtn" class="icon-btn" title="重置">↺</button>
+                <div class="panel-header" style="flex-direction: column; align-items: flex-start; gap: 12px;">
+                    <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+                        <h2>📄 简历预览</h2>
+                        <div class="preview-controls">
+                            <button type="button" id="zoomInBtn" class="icon-btn" title="放大">🔍+</button>
+                            <button type="button" id="zoomOutBtn" class="icon-btn" title="缩小">🔍-</button>
+                            <button type="button" id="resetZoomBtn" class="icon-btn" title="重置">↺</button>
+                        </div>
+                    </div>
+                    <!-- 模板切换 -->
+                    <div class="template-selector">
+                        <button type="button" class="template-btn active" data-template="classic" title="经典模板">
+                            📄 经典
+                        </button>
+                        <button type="button" class="template-btn" data-template="modern" title="现代模板">
+                            ✨ 现代
+                        </button>
+                        <button type="button" class="template-btn" data-template="minimal" title="极简模板">
+                            📝 极简
+                        </button>
                     </div>
                 </div>
                 <div class="resume-preview" id="resumePreview">
@@ -175,6 +190,8 @@
 
     <!-- html2pdf.js 库 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- 简历模板系统 -->
+    <script src="resume-templates.js"></script>
     <script src="edit.js"></script>
 </body>
 </html>

@@ -391,6 +391,21 @@ function bindEvents() {
     document.getElementById('zoomOutBtn').addEventListener('click', zoomOut);
     document.getElementById('resetZoomBtn').addEventListener('click', resetZoom);
 
+    // 模板切换按钮
+    document.querySelectorAll('.template-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const templateId = this.dataset.template;
+            if (window.ResumeTemplates && window.ResumeTemplates.setTemplate(templateId)) {
+                // 移除所有按钮的active类
+                document.querySelectorAll('.template-btn').forEach(b => b.classList.remove('active'));
+                // 添加active类到当前按钮
+                this.classList.add('active');
+                // 重新渲染预览
+                updatePreview();
+            }
+        });
+    });
+
     // 监听表单输入变化
     attachInputListeners('.edit-form');
 
@@ -497,8 +512,22 @@ function collectFormData() {
     return data;
 }
 
-// 渲染预览
+// 渲染预览（使用模板系统）
 function renderPreview(resume) {
+    const previewDiv = document.getElementById('resumePreview');
+
+    // 使用模板系统渲染
+    if (window.ResumeTemplates) {
+        previewDiv.innerHTML = window.ResumeTemplates.render(resume);
+        return;
+    }
+
+    // 降级：使用原始渲染（如果模板系统未加载）
+    renderPreviewLegacy(resume);
+}
+
+// 原始渲染方法（备用）
+function renderPreviewLegacy(resume) {
     const previewDiv = document.getElementById('resumePreview');
 
     let html = '';

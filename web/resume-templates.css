@@ -1,0 +1,428 @@
+/* ========================================
+   简历模板样式 - 三种简洁风格
+   ======================================== */
+
+/* ========== 通用样式重置 ========== */
+.resume-classic,
+.resume-modern,
+.resume-minimal {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    line-height: 1.6;
+    color: #333;
+}
+
+/* ========================================
+   模板1: 经典模板 (Classic)
+   传统、专业、清晰
+   ======================================== */
+
+.resume-classic {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px;
+}
+
+/* 头部 */
+.classic-header {
+    text-align: center;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #333;
+    margin-bottom: 30px;
+}
+
+.classic-name {
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+    color: #000;
+}
+
+.classic-title {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 12px;
+}
+
+.classic-contact {
+    font-size: 14px;
+    color: #666;
+}
+
+.classic-contact span {
+    margin: 0 12px;
+}
+
+.classic-contact span:first-child {
+    margin-left: 0;
+}
+
+/* 章节 */
+.classic-section {
+    margin-bottom: 28px;
+}
+
+.classic-section-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0 0 16px 0;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #ddd;
+    color: #000;
+}
+
+/* 条目 */
+.classic-item {
+    margin-bottom: 16px;
+}
+
+.classic-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 4px;
+}
+
+.classic-item-header strong {
+    font-size: 15px;
+    color: #000;
+}
+
+.classic-date {
+    font-size: 13px;
+    color: #888;
+}
+
+.classic-item-info {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 6px;
+}
+
+.classic-role {
+    font-size: 14px;
+    color: #666;
+    font-weight: normal;
+}
+
+.classic-desc {
+    font-size: 14px;
+    color: #555;
+    margin-top: 6px;
+    line-height: 1.7;
+}
+
+.classic-tech {
+    font-size: 13px;
+    color: #666;
+    margin-top: 6px;
+}
+
+.classic-highlights {
+    margin: 8px 0 0 20px;
+    padding: 0;
+    font-size: 14px;
+    color: #555;
+}
+
+.classic-highlights li {
+    margin-bottom: 4px;
+}
+
+.classic-skills {
+    font-size: 14px;
+    color: #555;
+    line-height: 1.8;
+}
+
+/* ========================================
+   模板2: 现代模板 (Modern)
+   简约、双栏、时尚
+   ======================================== */
+
+.resume-modern {
+    display: flex;
+    max-width: 900px;
+    margin: 0 auto;
+    min-height: 100%;
+}
+
+/* 左侧栏 */
+.modern-sidebar {
+    width: 240px;
+    background: #f7f9fc;
+    padding: 40px 24px;
+    flex-shrink: 0;
+}
+
+.modern-profile {
+    margin-bottom: 32px;
+}
+
+.modern-name {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+    color: #1a1a1a;
+    line-height: 1.2;
+}
+
+.modern-title {
+    font-size: 14px;
+    color: #666;
+    font-weight: 500;
+}
+
+.modern-sidebar-title {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #333;
+    margin: 0 0 12px 0;
+    letter-spacing: 0.5px;
+}
+
+.modern-contact {
+    margin-bottom: 28px;
+}
+
+.modern-contact div {
+    font-size: 13px;
+    color: #555;
+    margin-bottom: 8px;
+}
+
+.modern-skills {
+    margin-bottom: 28px;
+}
+
+.modern-skill-item {
+    font-size: 13px;
+    color: #555;
+    padding: 6px 12px;
+    background: white;
+    border-radius: 4px;
+    margin-bottom: 6px;
+}
+
+/* 右侧主内容 */
+.modern-main {
+    flex: 1;
+    padding: 40px 40px 40px 32px;
+    background: white;
+}
+
+.modern-section {
+    margin-bottom: 32px;
+}
+
+.modern-section-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0 0 16px 0;
+    color: #1a1a1a;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.modern-item {
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.modern-item:last-child {
+    border-bottom: none;
+}
+
+.modern-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+}
+
+.modern-item-header strong {
+    font-size: 15px;
+    color: #000;
+}
+
+.modern-subtitle {
+    font-size: 14px;
+    color: #666;
+    margin-top: 2px;
+}
+
+.modern-date {
+    font-size: 12px;
+    color: #999;
+    white-space: nowrap;
+}
+
+.modern-desc {
+    font-size: 14px;
+    color: #555;
+    margin-top: 8px;
+    line-height: 1.7;
+}
+
+.modern-tech {
+    margin-top: 8px;
+}
+
+.modern-tech-tag {
+    display: inline-block;
+    font-size: 12px;
+    color: #4a5568;
+    background: #e2e8f0;
+    padding: 3px 10px;
+    border-radius: 12px;
+    margin-right: 6px;
+    margin-top: 4px;
+}
+
+.modern-highlights {
+    margin: 10px 0 0 20px;
+    padding: 0;
+    font-size: 13px;
+    color: #555;
+}
+
+.modern-highlights li {
+    margin-bottom: 6px;
+}
+
+/* ========================================
+   模板3: 极简模板 (Minimal)
+   超简洁、纯文字、高效
+   ======================================== */
+
+.resume-minimal {
+    max-width: 750px;
+    margin: 0 auto;
+    padding: 30px 40px;
+}
+
+/* 头部 */
+.minimal-header {
+    margin-bottom: 24px;
+}
+
+.minimal-header h1 {
+    font-size: 32px;
+    font-weight: 700;
+    margin: 0 0 4px 0;
+    color: #000;
+}
+
+.minimal-title {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 6px;
+}
+
+.minimal-contact {
+    font-size: 14px;
+    color: #888;
+}
+
+/* 章节 */
+.minimal-section {
+    margin-bottom: 20px;
+}
+
+.minimal-section h2 {
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 0 0 12px 0;
+    color: #000;
+}
+
+/* 条目 */
+.minimal-item {
+    margin-bottom: 14px;
+}
+
+.minimal-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 14px;
+    margin-bottom: 3px;
+}
+
+.minimal-line strong {
+    color: #000;
+}
+
+.minimal-date {
+    font-size: 13px;
+    color: #999;
+    font-weight: normal;
+    margin-left: auto;
+    padding-left: 12px;
+}
+
+.minimal-desc {
+    font-size: 13px;
+    color: #555;
+    margin-top: 4px;
+    line-height: 1.6;
+}
+
+.minimal-tech {
+    font-size: 13px;
+    color: #666;
+    margin-top: 4px;
+}
+
+/* ========================================
+   打印优化
+   ======================================== */
+
+@media print {
+    .resume-classic,
+    .resume-modern,
+    .resume-minimal {
+        padding: 20px;
+        font-size: 11pt;
+    }
+
+    .modern-sidebar {
+        background: #f5f5f5 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .modern-tech-tag,
+    .modern-skill-item {
+        background: #e8e8e8 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+}
+
+/* ========================================
+   响应式设计
+   ======================================== */
+
+@media (max-width: 768px) {
+    .resume-modern {
+        flex-direction: column;
+    }
+
+    .modern-sidebar {
+        width: 100%;
+        padding: 24px 20px;
+    }
+
+    .modern-main {
+        padding: 24px 20px;
+    }
+
+    .resume-classic,
+    .resume-minimal {
+        padding: 24px 20px;
+    }
+}
