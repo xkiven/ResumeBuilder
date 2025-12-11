@@ -1,5 +1,36 @@
 /* 编辑页面专用样式 */
 
+/* CSS 变量定义 */
+:root {
+    /* 颜色变量 */
+    --primary-color: #3b82f6;
+    --primary-hover: #2563eb;
+    --secondary-color: #8b5cf6;
+    --success-color: #10b981;
+    --danger-color: #ef4444;
+    --warning-color: #f59e0b;
+    --text-primary: #ffffff;
+    --text-secondary: #e5e7eb;
+    --border-color: #e5e7eb;
+    --bg-primary: #ffffff;
+    --bg-secondary: rgba(255, 255, 255, 0.1);
+    --bg-tertiary: #f3f4f6;
+
+    /* 渐变色 */
+    --primary-gradient: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    --secondary-gradient: linear-gradient(135deg, #10b981, #059669);
+
+    /* 阴影 */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+
+    /* 圆角 */
+    --radius-sm: 0.375rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+}
+
 /* 操作按钮栏 */
 .action-bar {
     display: flex;
@@ -421,6 +452,42 @@
         align-items: center;
         gap: 0.5rem;
     }
+}
+
+/* PDF 打印优化样式 */
+@media print {
+    .resume-preview {
+        box-shadow: none;
+        background: white;
+        color: #000;
+    }
+
+    .resume-section {
+        page-break-inside: avoid;
+    }
+
+    .resume-item {
+        page-break-inside: avoid;
+    }
+
+    .resume-header {
+        page-break-after: avoid;
+    }
+}
+
+/* PDF 输出优化 - 避免内容被截断 */
+.resume-section {
+    page-break-inside: avoid;
+    margin-bottom: 1.5rem;
+}
+
+.resume-item {
+    page-break-inside: avoid;
+    margin-bottom: 1rem;
+}
+
+.resume-header {
+    page-break-after: avoid;
 }
 
 /* 自定义滚动条 */

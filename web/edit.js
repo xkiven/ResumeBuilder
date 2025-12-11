@@ -752,10 +752,51 @@ function exportJSON() {
 }
 
 // 导出 PDF
-function exportPDF() {
-    showToast('📄 PDF 导出功能开发中...', 'info');
-    // TODO: 实现 PDF 导出功能
-    // 可以使用 html2pdf.js 或类似库
+async function exportPDF() {
+    const data = collectFormData();
+
+    // 检查是否有内容
+    if (!data.basic_info[0].name) {
+        showToast('❌ 请至少填写姓名后再导出', 'error');
+        return;
+    }
+
+    try {
+        showLoading(true);
+        showToast('📄 正在生成PDF，请稍候...', 'info');
+
+        const element = document.getElementById('resumePreview');
+
+        // PDF 配置选项
+        const opt = {
+            margin: [10, 10, 10, 10],  // 上右下左边距（毫米）
+            filename: `resume_${data.basic_info[0].name}_${Date.now()}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: {
+                scale: 2,  // 提高清晰度
+                useCORS: true,
+                letterRendering: true
+            },
+            jsPDF: {
+                unit: 'mm',
+                format: 'a4',
+                orientation: 'portrait'  // 纵向
+            },
+            pagebreak: {
+                mode: ['avoid-all', 'css', 'legacy']  // 智能分页
+            }
+        };
+
+        // 生成 PDF
+        await html2pdf().set(opt).from(element).save();
+
+        showToast('✅ PDF 导出成功！', 'success');
+    } catch (error) {
+        showToast(`❌ PDF 导出失败: ${error.message}`, 'error');
+        console.error('PDF导出失败:', error);
+    } finally {
+        showLoading(false);
+    }
 }
 
 // GitHub 项目分析
