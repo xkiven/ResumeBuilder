@@ -25,10 +25,16 @@ func NewResumeController(service service.ResumeService) *ResumeController {
 func (r *ResumeController) GetResumeHandler(c *gin.Context) {
 	userID := c.Param("userID")
 
+	// 验证userID是否为空
+	if userID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "用户ID不能为空"})
+		return
+	}
+
 	// 调用服务层获取简历
 	resume, err := r.service.GetResume(context.Background(), userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -60,6 +66,13 @@ func (r *ResumeController) GenerateResumeHandler(c *gin.Context) {
 	}
 
 	userID := c.Param("userID")
+
+	// 验证userID是否为空
+	if userID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "用户ID不能为空"})
+		return
+	}
+
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
 		return
@@ -78,6 +91,12 @@ func (r *ResumeController) GenerateResumeHandler(c *gin.Context) {
 // DeleteResumeHandler 删除简历
 func (r *ResumeController) DeleteResumeHandler(c *gin.Context) {
 	userID := c.Param("userID")
+
+	// 验证userID是否为空
+	if userID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "用户ID不能为空"})
+		return
+	}
 
 	// 调用服务层删除简历
 	err := r.service.DeleteResume(context.Background(), userID)
@@ -100,6 +119,13 @@ func (r *ResumeController) AddGitHubProjectHandler(c *gin.Context) {
 	}
 
 	userID := c.Param("userID")
+
+	// 验证userID是否为空
+	if userID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "用户ID不能为空"})
+		return
+	}
+
 	resume, err := r.service.AnalyzeAndAddGitHubProject(context.Background(), userID, req.RepoURL)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
