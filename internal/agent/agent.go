@@ -53,7 +53,15 @@ func (a *agent) ParseResume(ctx context.Context, client *arkruntime.Client, raw 
 
 	// 构建简历生成的提示文本，要求生成结构化 JSON 简历
 	prompt := fmt.Sprintf(`
-	你是一个简历解析器。请根据以下文本生成结构化的简历（JSON 格式）。请确保生成的简历包含以下信息：基本信息、教育背景、工作经历、项目经验和技能（请按照以下结构输出 JSON 格式）：
+	你是一个简历解析器。请根据以下文本生成结构化的简历（JSON 格式）。
+
+	重要规则：
+	1. 只提取文本中实际存在的信息
+	2. 如果某个字段没有信息，请使用空字符串 "" 或空数组 []
+	3. 绝对不要使用"未提供"、"未填写"、"暂无"等占位文本
+	4. 没有信息的字段保持为空值，不要编造或填充任何内容
+
+	请按照以下结构输出 JSON 格式：
 	{
 		"user_id": "用户ID",
 		"basic_info": [{"name": "姓名", "email": "邮箱", "phone": "电话", "location": "位置", "title": "职位"}],
@@ -62,6 +70,7 @@ func (a *agent) ParseResume(ctx context.Context, client *arkruntime.Client, raw 
 		"projects": [{"name": "项目名称", "role": "角色", "description": "项目描述", "tech_stack": ["技术栈1", "技术栈2"], "highlights": ["亮点1", "亮点2"]}],
 		"skills": ["技能1", "技能2"]
 	}
+
 	以下是简历文本：
 	%s
 	`, raw)

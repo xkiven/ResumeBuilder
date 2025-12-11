@@ -230,131 +230,67 @@ body {
     }
 }
 
-/* ========== 进度条样式 ========== */
-.progress-bar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 2rem;
-    padding: 0 1rem;
-    position: relative;
-    z-index: 1;
-}
-
-.progress-step {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-    position: relative;
-}
-
-.step-circle {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.3);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-    border: 2px solid rgba(255, 255, 255, 0.5);
-}
-
-.progress-step.active .step-circle {
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-    border-color: white;
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
-    transform: scale(1.1);
-}
-
-.progress-step.completed .step-circle {
-    background: var(--success-color);
-    border-color: white;
-}
-
-.step-label {
-    font-size: 0.75rem;
-    color: rgba(255, 255, 255, 0.7);
-    font-weight: 500;
-    white-space: nowrap;
-}
-
-.progress-step.active .step-label {
-    color: white;
-    font-weight: 700;
-}
-
-.progress-line {
-    height: 2px;
-    background: rgba(255, 255, 255, 0.3);
-    flex: 1;
-    margin: 0 0.5rem;
-    max-width: 80px;
-}
-
-.progress-step.completed ~ .progress-line {
-    background: var(--success-color);
-}
-
-/* ========== 主卡片样式 ========== */
-.main-card {
-    background: white;
-    border-radius: var(--radius-lg);
-    padding: 2.5rem;
-    box-shadow: var(--shadow-lg);
-    max-width: 900px;
+/* ========== 容器布局 ========== */
+.container {
+    max-width: 1400px;
     margin: 0 auto;
     position: relative;
     z-index: 1;
-    min-height: 500px;
 }
 
-/* ========== 表单步骤样式 ========== */
-.form-step {
-    display: none;
-    animation: fadeInUp 0.4s ease;
-}
-
-.form-step.active {
-    display: block;
-}
-
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.form-step h2 {
-    font-size: 1.75rem;
-    color: var(--text-primary);
-    margin-bottom: 0.5rem;
-}
-
-.step-description {
-    color: var(--text-secondary);
+/* ========== 头部 ========== */
+.header {
+    text-align: center;
+    color: white;
     margin-bottom: 2rem;
-    font-size: 0.95rem;
 }
 
-/* ========== 表单网格 ========== */
-.form-grid {
+.header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.subtitle {
+    font-size: 1.125rem;
+    opacity: 0.9;
+}
+
+/* ========== 主内容区 ========== */
+.main-content {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.5rem;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
 }
 
-.form-group.full-width {
-    grid-column: 1 / -1;
+/* ========== 卡片样式 ========== */
+.card {
+    background: var(--bg-primary);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    box-shadow: var(--shadow-lg);
+    height: fit-content;
+}
+
+.card h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.card-header h2 {
+    margin-bottom: 0;
 }
 
 /* ========== 表单组件 ========== */
@@ -370,13 +306,8 @@ body {
     font-size: 0.875rem;
 }
 
-.required {
-    color: var(--danger-color);
-}
-
 .form-group input,
-.form-group textarea,
-.form-group select {
+.form-group textarea {
     width: 100%;
     padding: 0.75rem 1rem;
     border: 2px solid var(--border-color);
@@ -387,8 +318,7 @@ body {
 }
 
 .form-group input:focus,
-.form-group textarea:focus,
-.form-group select:focus {
+.form-group textarea:focus {
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
@@ -396,7 +326,7 @@ body {
 
 .form-group textarea {
     resize: vertical;
-    min-height: 100px;
+    min-height: 120px;
 }
 
 .helper-text {
@@ -406,7 +336,73 @@ body {
     color: var(--text-secondary);
 }
 
+/* ========== 分步输入样式 ========== */
+.step-input-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.input-step {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    border-left: 3px solid var(--primary-color);
+    transition: all 0.2s ease;
+}
+
+.input-step:hover {
+    background: var(--bg-tertiary);
+    box-shadow: var(--shadow-sm);
+}
+
+.step-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.step-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.mini-input,
+.mini-textarea {
+    width: 100%;
+    padding: 0.625rem 0.875rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+    font-family: inherit;
+    background: white;
+}
+
+.mini-input:focus,
+.mini-textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.mini-textarea {
+    resize: vertical;
+    min-height: 60px;
+}
+
 /* ========== 按钮样式 ========== */
+.button-group {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
 .btn {
     padding: 0.75rem 1.5rem;
     border: none;
@@ -434,6 +430,10 @@ body {
 .btn-primary:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-lg);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
 }
 
 .btn-secondary {
@@ -467,13 +467,9 @@ body {
     color: white;
 }
 
-.btn-large {
-    padding: 1rem 2rem;
-    font-size: 1.1rem;
-}
-
-.btn-add {
-    margin-top: 1rem;
+.btn-small {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
 }
 
 .btn:disabled {
@@ -481,123 +477,73 @@ body {
     cursor: not-allowed;
 }
 
-/* ========== 导航按钮 ========== */
-.navigation-buttons {
+.btn.pulse {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    }
+}
+
+.export-buttons {
     display: flex;
-    justify-content: space-between;
-    margin-top: 2rem;
-    padding-top: 2rem;
-    border-top: 2px solid var(--bg-tertiary);
+    gap: 0.5rem;
 }
 
-/* ========== 动态列表样式 ========== */
-.dynamic-item {
-    background: var(--bg-secondary);
-    padding: 1.5rem;
-    border-radius: var(--radius-md);
+/* ========== 加载状态 ========== */
+.loading-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text-secondary);
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid var(--bg-tertiary);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ========== 空状态 ========== */
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text-secondary);
+}
+
+.empty-icon {
+    font-size: 4rem;
     margin-bottom: 1rem;
-    border-left: 4px solid var(--primary-color);
-    position: relative;
 }
 
-.item-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-}
-
-.item-title {
+.empty-state p {
+    font-size: 1.125rem;
     font-weight: 600;
-    color: var(--text-primary);
-}
-
-.btn-remove {
-    background: var(--danger-color);
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    font-size: 0.875rem;
-    transition: all 0.2s ease;
-}
-
-.btn-remove:hover {
-    background: #dc2626;
-}
-
-.form-section {
-    margin-bottom: 2rem;
-    padding-bottom: 2rem;
-    border-bottom: 2px solid var(--bg-tertiary);
-}
-
-.form-section:last-child {
-    border-bottom: none;
-}
-
-.form-section h3 {
-    font-size: 1.25rem;
-    color: var(--text-primary);
-    margin-bottom: 1rem;
-}
-
-
-/* ========== 预览区域样式 ========== */
-.preview-container {
-    background: var(--bg-secondary);
-    border-radius: var(--radius-md);
-    padding: 1.5rem;
-    margin-bottom: 2rem;
-    min-height: 300px;
-}
-
-.preview-content {
-    color: var(--text-primary);
-    line-height: 1.8;
-}
-
-.preview-section {
-    margin-bottom: 1.5rem;
-}
-
-.preview-section h4 {
-    font-size: 1.1rem;
-    color: var(--primary-color);
-    margin-bottom: 0.75rem;
-    font-weight: 600;
-}
-
-.preview-item {
     margin-bottom: 0.5rem;
-    padding-left: 1rem;
-    position: relative;
 }
 
-.preview-item::before {
-    content: "▸";
-    position: absolute;
-    left: 0;
-    color: var(--primary-color);
+.empty-state small {
+    color: var(--text-secondary);
 }
 
-/* ========== 生成/导出按钮区域 ========== */
-.generate-actions,
-.export-actions {
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
-    margin-bottom: 2rem;
-}
-
-.divider {
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
-    margin: 2rem 0;
-}
-
-/* ========== 简历展示样式 ========== */
+/* ========== 简历内容样式 ========== */
 .resume-content {
     animation: fadeIn 0.3s ease;
 }
@@ -632,7 +578,7 @@ body {
     gap: 0.5rem;
 }
 
-/* 基本信息网格 */
+/* 基本信息 */
 .basic-info-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -658,7 +604,7 @@ body {
     color: var(--text-primary);
 }
 
-/* 教育/工作/项目条目 */
+/* 教育背景 */
 .education-item,
 .experience-item,
 .project-item {
@@ -782,7 +728,7 @@ body {
     display: none;
     align-items: center;
     gap: 0.75rem;
-    z-index: 10000;
+    z-index: 1000;
     min-width: 300px;
     animation: slideIn 0.3s ease;
 }
@@ -815,59 +761,76 @@ body {
 }
 
 /* ========== 响应式设计 ========== */
+@media (max-width: 1024px) {
+    .main-content {
+        grid-template-columns: 1fr;
+    }
+
+    .header h1 {
+        font-size: 2rem;
+    }
+}
+
 @media (max-width: 768px) {
     body {
         padding: 1rem 0.5rem;
     }
 
-    .progress-bar {
-        flex-wrap: wrap;
-        gap: 0.5rem;
-    }
-
-    .progress-step {
-        font-size: 0.7rem;
-    }
-
-    .progress-line {
-        display: none;
-    }
-
-    .main-card {
+    .card {
         padding: 1.5rem;
     }
 
-    .form-grid {
-        grid-template-columns: 1fr;
+    .header h1 {
+        font-size: 1.75rem;
     }
 
-    .navigation-buttons {
+    .button-group {
         flex-direction: column;
-        gap: 1rem;
     }
 
-    .navigation-buttons .btn {
+    .btn {
         width: 100%;
         justify-content: center;
-    }
-
-    .generate-actions,
-    .export-actions {
-        flex-direction: column;
-    }
-
-    .generate-actions .btn,
-    .export-actions .btn {
-        width: 100%;
     }
 
     .basic-info-grid {
         grid-template-columns: 1fr;
     }
 
+    .item-header {
+        flex-direction: column;
+    }
+
     .toast {
         right: 1rem;
         left: 1rem;
         min-width: auto;
+    }
+}
+
+/* ========== 打印样式 ========== */
+@media print {
+    body {
+        background: white;
+        padding: 0;
+    }
+
+    .input-section,
+    .export-buttons,
+    .btn {
+        display: none !important;
+    }
+
+    .main-content {
+        grid-template-columns: 1fr;
+    }
+
+    .card {
+        box-shadow: none;
+        padding: 0;
+    }
+
+    .resume-section {
+        break-inside: avoid;
     }
 }
