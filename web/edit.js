@@ -8,6 +8,7 @@ let currentResume = null;
 let educationCount = 0;
 let experienceCount = 0;
 let projectCount = 0;
+let skillCount = 0;
 let zoomLevel = 1;
 let changesMade = false;
 
@@ -210,7 +211,7 @@ function fillForm(resume) {
 
     // 技能
     if (resume.skills && resume.skills.length > 0) {
-        document.getElementById('skills').value = resume.skills.join(', ');
+        resume.skills.forEach(skill => addSkill(skill));
     }
 
     // 项目
@@ -348,6 +349,24 @@ function addProject(data = {}) {
     attachInputListeners(`#${id}`);
 }
 
+// 添加技能
+function addSkill(skillText = '') {
+    skillCount++;
+    const id = `skill-${skillCount}`;
+
+    const html = `
+        <div class="dynamic-item" id="${id}" data-type="skill" style="padding: 12px;">
+            <button type="button" class="remove-btn" onclick="removeItem('${id}')">×</button>
+            <div class="form-group" style="margin: 0;">
+                <input type="text" name="skill" placeholder="例如: 熟悉使用 Go 语言进行后端开发" value="${skillText}" style="width: 100%;" />
+            </div>
+        </div>
+    `;
+
+    document.getElementById('skillsList').insertAdjacentHTML('beforeend', html);
+    attachInputListeners(`#${id}`);
+}
+
 // 删除项
 function removeItem(id) {
     const item = document.getElementById(id);
@@ -384,6 +403,7 @@ function bindEvents() {
     document.getElementById('addEducationBtn').addEventListener('click', () => addEducation());
     document.getElementById('addExperienceBtn').addEventListener('click', () => addExperience());
     document.getElementById('addProjectBtn').addEventListener('click', () => addProject());
+    document.getElementById('addSkillBtn').addEventListener('click', () => addSkill());
     document.getElementById('addGithubBtn').addEventListener('click', addGitHubProject);
 
     // 缩放按钮
@@ -487,10 +507,12 @@ function collectFormData() {
     });
 
     // 技能
-    const skillsInput = document.getElementById('skills').value.trim();
-    if (skillsInput) {
-        data.skills = skillsInput.split(/[,，、]/).map(s => s.trim()).filter(s => s);
-    }
+    document.querySelectorAll('#skillsList .dynamic-item').forEach(item => {
+        const skill = item.querySelector('[name="skill"]').value.trim();
+        if (skill) {
+            data.skills.push(skill);
+        }
+    });
 
     // 项目
     document.querySelectorAll('#projectsList .dynamic-item').forEach(item => {
@@ -702,58 +724,13 @@ async function saveResume() {
 
     showLoading(true);
     try {
-        // 组装 raw 文本
-        let rawText = '';
-        const basic = data.basic_info[0];
-
-        if (basic.name) rawText += `姓名：${basic.name}\n`;
-        if (basic.email) rawText += `邮箱：${basic.email}\n`;
-        if (basic.phone) rawText += `电话：${basic.phone}\n`;
-        if (basic.location) rawText += `所在地：${basic.location}\n`;
-        if (basic.title) rawText += `职位：${basic.title}\n`;
-
-        if (data.education.length > 0) {
-            rawText += '\n教育背景：\n';
-            data.education.forEach(edu => {
-                rawText += `${edu.school} | ${edu.major} | ${edu.degree} | ${edu.start_date} - ${edu.end_date}\n`;
-            });
-        }
-
-        if (data.experience.length > 0) {
-            rawText += '\n工作经历：\n';
-            data.experience.forEach(exp => {
-                rawText += `${exp.company} | ${exp.position} | ${exp.start_date} - ${exp.end_date}\n`;
-                if (exp.achievements) rawText += `${exp.achievements}\n`;
-            });
-        }
-
-        if (data.skills.length > 0) {
-            rawText += `\n技能：${data.skills.join(', ')}\n`;
-        }
-
-        if (data.projects.length > 0) {
-            rawText += '\n项目经验：\n';
-            data.projects.forEach(proj => {
-                rawText += `${proj.name}`;
-                if (proj.role) rawText += `（${proj.role}）`;
-                if (proj.url) rawText += ` | ${proj.url}`;
-                rawText += '\n';
-                if (proj.description) rawText += `${proj.description}\n`;
-                if (proj.tech_stack && proj.tech_stack.length > 0) {
-                    rawText += `技术栈：${proj.tech_stack.join('、')}\n`;
-                }
-                if (proj.highlights && proj.highlights.length > 0) {
-                    proj.highlights.forEach(h => rawText += `  * ${h}\n`);
-                }
-            });
-        }
-
-        const resume = await apiRequest(`${API_BASE_URL}/resume/${currentUserID}/generate`, {
+        // 直接保存简历数据，不需要 AI 解析
+        await apiRequest(`${API_BASE_URL}/resume`, {
             method: 'POST',
-            body: JSON.stringify({ raw: rawText }),
+            body: JSON.stringify(data),
         });
 
-        currentResume = resume;
+        currentResume = data;
         changesMade = false;
         showToast('✅ 保存成功', 'success');
     } catch (error) {

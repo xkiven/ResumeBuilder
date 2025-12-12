@@ -134,6 +134,18 @@
     line-height: 1.8;
 }
 
+.classic-skills-list {
+    margin: 0 0 0 20px;
+    padding: 0;
+    font-size: 14px;
+    color: #555;
+}
+
+.classic-skills-list li {
+    margin-bottom: 6px;
+    line-height: 1.6;
+}
+
 /* ========================================
    模板2: 现代模板 (Modern)
    简约、双栏、时尚
@@ -375,6 +387,29 @@
     font-size: 13px;
     color: #666;
     margin-top: 4px;
+}
+
+.minimal-highlights {
+    margin: 6px 0 0 20px;
+    padding: 0;
+    font-size: 13px;
+    color: #555;
+}
+
+.minimal-highlights li {
+    margin-bottom: 3px;
+}
+
+.minimal-skills-list {
+    margin: 0 0 0 20px;
+    padding: 0;
+    font-size: 13px;
+    color: #555;
+}
+
+.minimal-skills-list li {
+    margin-bottom: 4px;
+    line-height: 1.6;
 }
 
 /* ========================================

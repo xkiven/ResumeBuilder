@@ -81,6 +81,18 @@ const ResumeTemplates = {
             </div>
         `);
 
+        // 技能特长
+        if (resume.skills && resume.skills.length > 0) {
+            html += `
+                <div class="classic-section">
+                    <h2 class="classic-section-title">技能特长</h2>
+                    <ul class="classic-skills-list">
+                        ${resume.skills.map(skill => `<li>${this._enhanceSkill(skill)}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+        }
+
         // 工作经历
         html += this._renderSection(resume.experience, 'experience', '工作经历', (exp) => `
             <div class="classic-item">
@@ -109,16 +121,6 @@ const ResumeTemplates = {
                 ` : ''}
             </div>
         `);
-
-        // 技能特长
-        if (resume.skills && resume.skills.length > 0) {
-            html += `
-                <div class="classic-section">
-                    <h2 class="classic-section-title">技能特长</h2>
-                    <div class="classic-skills">${resume.skills.join(' · ')}</div>
-                </div>
-            `;
-        }
 
         html += '</div>';
         return html;
@@ -156,7 +158,7 @@ const ResumeTemplates = {
             html += `
                 <div class="modern-skills">
                     <h3 class="modern-sidebar-title">技能特长</h3>
-                    ${resume.skills.map(skill => `<div class="modern-skill-item">${skill}</div>`).join('')}
+                    ${resume.skills.map(skill => `<div class="modern-skill-item">${this._enhanceSkill(skill)}</div>`).join('')}
                 </div>
             `;
         }
@@ -165,6 +167,19 @@ const ResumeTemplates = {
 
         // 右侧主内容
         html += '<div class="modern-main">';
+
+        // 教育背景
+        html += this._renderSection(resume.education, 'education', '教育背景', (edu) => `
+            <div class="modern-item">
+                <div class="modern-item-header">
+                    <strong>${edu.school || ''}</strong>
+                    <div class="modern-date">${this._formatDateRange(edu.start_date, edu.end_date)}</div>
+                </div>
+                <div class="modern-subtitle">
+                    ${edu.major ? `${edu.major}` : ''}${edu.degree ? ` · ${edu.degree}` : ''}
+                </div>
+            </div>
+        `, 'modern-section');
 
         // 工作经历
         html += this._renderSection(resume.experience, 'experience', '工作经历', (exp) => `
@@ -196,19 +211,6 @@ const ResumeTemplates = {
             </div>
         `, 'modern-section');
 
-        // 教育背景
-        html += this._renderSection(resume.education, 'education', '教育背景', (edu) => `
-            <div class="modern-item">
-                <div class="modern-item-header">
-                    <strong>${edu.school || ''}</strong>
-                    <div class="modern-date">${this._formatDateRange(edu.start_date, edu.end_date)}</div>
-                </div>
-                <div class="modern-subtitle">
-                    ${edu.major ? `${edu.major}` : ''}${edu.degree ? ` · ${edu.degree}` : ''}
-                </div>
-            </div>
-        `, 'modern-section');
-
         html += '</div>'; // 右侧主内容结束
         html += '</div>'; // modern容器结束
         return html;
@@ -233,6 +235,28 @@ const ResumeTemplates = {
             </div>
         `;
 
+        // 教育背景
+        html += this._renderSection(resume.education, 'education', '教育背景', (edu) => `
+            <div class="minimal-item">
+                <div class="minimal-line">
+                    <strong>${edu.school}</strong>, ${edu.major || ''}${edu.degree ? ` (${edu.degree})` : ''}
+                    <span class="minimal-date">${this._formatDateRange(edu.start_date, edu.end_date)}</span>
+                </div>
+            </div>
+        `, 'minimal-section');
+
+        // 技能特长
+        if (resume.skills && resume.skills.length > 0) {
+            html += `
+                <div class="minimal-section">
+                    <h2>技能特长</h2>
+                    <ul class="minimal-skills-list">
+                        ${resume.skills.map(skill => `<li>${this._enhanceSkill(skill)}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+        }
+
         // 工作经历
         html += this._renderSection(resume.experience, 'experience', '工作经历', (exp) => `
             <div class="minimal-item">
@@ -252,28 +276,13 @@ const ResumeTemplates = {
                 ${proj.tech_stack && proj.tech_stack.length > 0 ? `
                     <div class="minimal-tech">技术: ${proj.tech_stack.join(', ')}</div>
                 ` : ''}
+                ${proj.highlights && proj.highlights.length > 0 ? `
+                    <ul class="minimal-highlights">
+                        ${proj.highlights.map(h => `<li>${h}</li>`).join('')}
+                    </ul>
+                ` : ''}
             </div>
         `, 'minimal-section');
-
-        // 教育背景
-        html += this._renderSection(resume.education, 'education', '教育背景', (edu) => `
-            <div class="minimal-item">
-                <div class="minimal-line">
-                    <strong>${edu.school}</strong>, ${edu.major || ''}${edu.degree ? ` (${edu.degree})` : ''}
-                    <span class="minimal-date">${this._formatDateRange(edu.start_date, edu.end_date)}</span>
-                </div>
-            </div>
-        `, 'minimal-section');
-
-        // 技能特长
-        if (resume.skills && resume.skills.length > 0) {
-            html += `
-                <div class="minimal-section">
-                    <h2>技能特长</h2>
-                    <div>${resume.skills.join(' · ')}</div>
-                </div>
-            `;
-        }
 
         html += '</div>';
         return html;
@@ -325,6 +334,125 @@ const ResumeTemplates = {
             return `${parts[0]}.${parts[1]}`;
         }
         return dateStr;
+    },
+
+    // 智能优化技能描述：将关键词转换为完整句子
+    _enhanceSkill(skill) {
+        // 如果已经是完整句子（包含"熟悉"、"掌握"等词），直接返回
+        if (/^(熟悉|掌握|了解|精通|擅长|熟练)/.test(skill)) {
+            return skill;
+        }
+
+        // 技能关键词映射表
+        const skillMap = {
+            // 编程语言
+            'Go': '熟悉使用 Go 语言进行后端开发',
+            'Python': '熟悉使用 Python 进行开发',
+            'Java': '熟悉使用 Java 进行开发',
+            'JavaScript': '熟悉 JavaScript 前后端开发',
+            'TypeScript': '熟悉 TypeScript 类型化开发',
+            'C++': '熟悉 C++ 编程',
+            'C': '熟悉 C 语言编程',
+
+            // Web 框架
+            'Gin': '熟悉 Gin Web 框架',
+            'Echo': '熟悉 Echo Web 框架',
+            'Fiber': '熟悉 Fiber Web 框架',
+            'Django': '熟悉 Django Web 框架',
+            'Flask': '熟悉 Flask 轻量级框架',
+            'Spring Boot': '熟悉 Spring Boot 框架',
+            'Express': '熟悉 Express.js 框架',
+            'Nest.js': '熟悉 Nest.js 框架',
+
+            // ORM
+            'GORM': '熟悉 GORM 对象关系映射',
+            'TypeORM': '熟悉 TypeORM 数据库操作',
+            'Hibernate': '熟悉 Hibernate ORM 框架',
+
+            // 数据库
+            'MySQL': '掌握 MySQL 数据库设计与优化',
+            'PostgreSQL': '掌握 PostgreSQL 数据库',
+            'MongoDB': '熟悉 MongoDB 文档数据库',
+            'Redis': '熟悉 Redis 缓存设计',
+            'SQLite': '了解 SQLite 轻量级数据库',
+
+            // 消息队列
+            'RabbitMQ': '了解 RabbitMQ 消息队列',
+            'Kafka': '了解 Kafka 分布式消息系统',
+            'RocketMQ': '了解 RocketMQ 消息中间件',
+
+            // WebSocket
+            'Gorilla WebSocket': '熟悉 WebSocket 实时通信',
+            'WebSocket': '熟悉 WebSocket 实时通信技术',
+            'Socket.io': '熟悉 Socket.io 实时通信',
+
+            // 缓存
+            'go-cache': '熟悉 Go 缓存技术',
+            'Memcached': '了解 Memcached 缓存系统',
+
+            // 邮件
+            'QQ SMTP': '了解 SMTP 邮件发送',
+            'SMTP': '了解 SMTP 邮件服务',
+
+            // 会话管理
+            'Gin Sessions': '熟悉会话管理机制',
+            'JWT': '熟悉 JWT 认证机制',
+
+            // 日志
+            '标准库Logger': '熟悉日志记录与管理',
+            'Logger': '熟悉日志系统',
+            'Logrus': '熟悉 Logrus 日志框架',
+            'Zap': '熟悉 Zap 高性能日志库',
+
+            // 容器化
+            'Docker': '熟悉 Docker 容器化部署',
+            'Kubernetes': '了解 Kubernetes 容器编排',
+            'K8s': '了解 Kubernetes 容器编排',
+
+            // 网络协议
+            'TCP/IP': '掌握 TCP/IP 网络协议',
+            'HTTP': '掌握 HTTP 协议',
+            'HTTPS': '掌握 HTTPS 安全协议',
+            'gRPC': '熟悉 gRPC 远程调用',
+
+            // 前端技术
+            'React': '熟悉 React 前端框架',
+            'Vue': '熟悉 Vue.js 前端框架',
+            'Angular': '熟悉 Angular 前端框架',
+
+            // 版本控制
+            'Git': '熟练使用 Git 版本控制',
+            'GitHub': '熟悉 GitHub 协作开发',
+            'GitLab': '熟悉 GitLab CI/CD',
+
+            // 其他
+            'Linux': '熟悉 Linux 系统操作',
+            'Nginx': '熟悉 Nginx 服务器配置',
+            'RESTful API': '熟悉 RESTful API 设计',
+            'Microservices': '了解微服务架构',
+        };
+
+        // 精确匹配
+        if (skillMap[skill]) {
+            return skillMap[skill];
+        }
+
+        // 模糊匹配（处理变体）
+        const skillLower = skill.toLowerCase();
+        for (const [key, value] of Object.entries(skillMap)) {
+            if (key.toLowerCase() === skillLower) {
+                return value;
+            }
+        }
+
+        // 通用转换规则
+        // 如果是单个词，添加通用前缀
+        if (skill.length < 20 && !/\s/.test(skill)) {
+            return `熟悉 ${skill}`;
+        }
+
+        // 否则保持原样
+        return skill;
     }
 };
 

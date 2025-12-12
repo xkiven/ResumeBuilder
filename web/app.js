@@ -195,8 +195,12 @@ function addEducation(data = {}) {
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>时间段</label>
-                    <input type="text" name="date_range" placeholder="2015-2019" value="${data.start_date && data.end_date ? `${data.start_date}-${data.end_date}` : ''}" />
+                    <label>开始时间</label>
+                    <input type="month" name="start_date" value="${data.start_date || ''}" />
+                </div>
+                <div class="form-group">
+                    <label>结束时间</label>
+                    <input type="month" name="end_date" value="${data.end_date || ''}" />
                 </div>
             </div>
         </div>
@@ -226,9 +230,13 @@ function addExperience(data = {}) {
                     <label>职位</label>
                     <input type="text" name="position" placeholder="高级开发工程师" value="${data.position || ''}" />
                 </div>
-                <div class="form-group full-width">
-                    <label>时间段</label>
-                    <input type="text" name="date_range" placeholder="2019-2023" value="${data.start_date && data.end_date ? `${data.start_date}-${data.end_date}` : ''}" />
+                <div class="form-group">
+                    <label>开始时间</label>
+                    <input type="month" name="start_date" value="${data.start_date || ''}" />
+                </div>
+                <div class="form-group">
+                    <label>结束时间</label>
+                    <input type="month" name="end_date" value="${data.end_date || ''}" />
                 </div>
                 <div class="form-group full-width">
                     <label>工作描述</label>
