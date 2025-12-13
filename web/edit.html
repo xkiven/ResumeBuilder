@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>编辑简历 - 智能简历生成器</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="edit.css">
+    <link rel="stylesheet" href="resume-templates.css">
+</head>
+<body>
+    <!-- 粒子背景动画 -->
+    <div class="particles-background">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
+    <div class="container">
+        <!-- 头部 -->
+        <header class="header">
+            <h1>📝 编辑简历</h1>
+            <p class="subtitle">实时修改，即时预览</p>
+        </header>
+
+        <!-- 操作按钮栏 -->
+        <div class="action-bar">
+            <button type="button" id="backBtn" class="btn btn-outline">
+                ← 返回向导
+            </button>
+            <div class="action-group">
+                <button type="button" id="saveBtn" class="btn btn-success">
+                    💾 保存修改
+                </button>
+                <button type="button" id="exportPDFBtn" class="btn btn-outline">
+                    📥 导出PDF
+                </button>
+                <button type="button" id="exportJSONBtn" class="btn btn-outline">
+                    📥 导出JSON
+                </button>
+            </div>
+        </div>
+
+        <!-- 左右分栏 -->
+        <div class="edit-layout">
+            <!-- 左侧：简历预览 -->
+            <div class="preview-panel">
+                <div class="panel-header" style="flex-direction: column; align-items: flex-start; gap: 12px;">
+                    <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+                        <h2>📄 简历预览</h2>
+                        <div class="preview-controls">
+                            <button type="button" id="zoomInBtn" class="icon-btn" title="放大">🔍+</button>
+                            <button type="button" id="zoomOutBtn" class="icon-btn" title="缩小">🔍-</button>
+                            <button type="button" id="resetZoomBtn" class="icon-btn" title="重置">↺</button>
+                        </div>
+                    </div>
+                    <!-- 模板切换 -->
+                    <div class="template-selector">
+                        <button type="button" class="template-btn active" data-template="classic" title="经典模板">
+                            📄 经典
+                        </button>
+                        <button type="button" class="template-btn" data-template="modern" title="现代模板">
+                            ✨ 现代
+                        </button>
+                        <button type="button" class="template-btn" data-template="minimal" title="极简模板">
+                            📝 极简
+                        </button>
+                    </div>
+                </div>
+                <div class="resume-preview" id="resumePreview">
+                    <!-- 简历内容将在这里动态渲染 -->
+                </div>
+            </div>
+
+            <!-- 右侧：编辑表单 -->
+            <div class="edit-panel">
+                <div class="panel-header">
+                    <h2>✏️ 编辑内容</h2>
+                    <span class="user-badge" id="userBadge">用户: <span id="currentUserID"></span></span>
+                </div>
+
+                <div class="edit-form">
+                    <!-- 基本信息 -->
+                    <div class="form-section">
+                        <h3>📝 基本信息</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="name">姓名 <span class="required">*</span></label>
+                                <input type="text" id="name" placeholder="张三" required />
+                            </div>
+                            <div class="form-group">
+                                <label for="email">邮箱 <span class="required">*</span></label>
+                                <input type="email" id="email" placeholder="zhangsan@example.com" required />
+                            </div>
+                            <div class="form-group">
+                                <label for="phone">电话</label>
+                                <input type="tel" id="phone" placeholder="13812345678" />
+                            </div>
+                            <div class="form-group">
+                                <label for="location">所在地</label>
+                                <input type="text" id="location" placeholder="北京市朝阳区" />
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="title">职位/职称</label>
+                                <input type="text" id="title" placeholder="高级软件工程师" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 教育背景 -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <h3>🎓 教育背景</h3>
+                            <button type="button" id="addEducationBtn" class="btn-icon">➕ 添加</button>
+                        </div>
+                        <div id="educationList"></div>
+                    </div>
+
+                    <!-- 工作经历 -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <h3>💼 工作经历</h3>
+                            <button type="button" id="addExperienceBtn" class="btn-icon">➕ 添加</button>
+                        </div>
+                        <div id="experienceList"></div>
+                    </div>
+
+                    <!-- 技能 -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <h3>⚡ 技能特长</h3>
+                            <button type="button" id="addSkillBtn" class="btn-icon">➕ 添加</button>
+                        </div>
+                        <div id="skillsList"></div>
+                    </div>
+
+                    <!-- 项目经验 -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <h3>🚀 项目经验</h3>
+                            <button type="button" id="addProjectBtn" class="btn-icon">➕ 手动添加</button>
+                        </div>
+                        <div id="projectsList"></div>
+
+                        <!-- GitHub 分析 -->
+                        <div class="github-section">
+                            <div class="form-group">
+                                <label for="githubURL">🔗 GitHub 仓库链接</label>
+                                <input type="url" id="githubURL" placeholder="https://github.com/username/repo" />
+                                <small class="helper-text">AI会自动分析README.md并提取项目信息</small>
+                            </div>
+                            <button type="button" id="addGithubBtn" class="btn btn-secondary">
+                                🤖 AI 分析并添加
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast通知 -->
+    <div id="toast" class="toast"></div>
+
+    <!-- 加载指示器 -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>加载中...</p>
+        </div>
+    </div>
+
+    <!-- html2pdf.js 库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- 简历模板系统 -->
+    <script src="resume-templates.js"></script>
+    <script src="edit.js"></script>
+</body>
+</html>

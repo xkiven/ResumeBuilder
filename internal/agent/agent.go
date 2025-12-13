@@ -1,11 +1,14 @@
 package agent
 
 import (
-	"_ResumeBuilder/internal/domain"
-	"_ResumeBuilder/internal/utils"
+	"ResumeBuilder/internal/domain"
+	"ResumeBuilder/internal/utils"
 	"context"
 	"encoding/json"
 	"fmt"
+	"regexp"
+	"strings"
+
 	"github.com/volcengine/volcengine-go-sdk/service/arkruntime"
 	"github.com/volcengine/volcengine-go-sdk/service/arkruntime/model"
 	"os"
@@ -53,22 +56,38 @@ func (a *agent) ParseResume(ctx context.Context, client *arkruntime.Client, raw 
 
 	// 构建简历生成的提示文本，要求生成结构化 JSON 简历
 	prompt := fmt.Sprintf(`
-	你是一个简历解析器。请根据以下文本生成结构化的简历（JSON 格式）。请确保生成的简历包含以下信息：基本信息、教育背景、工作经历、项目经验和技能（请按照以下结构输出 JSON 格式）：
+	你是一个简历解析器。请根据以下文本生成结构化的简历（JSON 格式）。
+
+	重要规则：
+	1. 只提取文本中实际存在的信息
+	2. 如果某个字段没有信息，请使用空字符串 "" 或空数组 []
+	3. 绝对不要使用"未提供"、"未填写"、"暂无"等占位文本
+	4. 没有信息的字段保持为空值，不要编造或填充任何内容
+	5. skills 字段必须是完整的描述性语句，每条技能都要用"熟悉"、"掌握"、"了解"、"精通"等程度词开头
+	6. 只返回纯 JSON 格式，不要添加任何 markdown 代码块标记（不要使用三个反引号包裹）
+
+	请按照以下结构输出纯 JSON 格式：
 	{
 		"user_id": "用户ID",
 		"basic_info": [{"name": "姓名", "email": "邮箱", "phone": "电话", "location": "位置", "title": "职位"}],
 		"education": [{"school": "学校", "major": "专业", "start_date": "开始日期", "end_date": "结束日期", "degree": "学位"}],
 		"experience": [{"company": "公司", "position": "职位", "start_date": "开始日期", "end_date": "结束日期", "description": "描述", "achievements": ["成就1", "成就2"]}],
 		"projects": [{"name": "项目名称", "role": "角色", "description": "项目描述", "tech_stack": ["技术栈1", "技术栈2"], "highlights": ["亮点1", "亮点2"]}],
-		"skills": ["技能1", "技能2"]
+		"skills": ["熟悉使用 Go 语言进行后端开发", "掌握 TCP/IP 网络协议模型", "了解分布式系统设计"]
 	}
+
+	技能格式说明：
+	- 每条技能必须是完整句子，包含程度词（熟悉/掌握/了解/精通）+ 技术名称 + 应用场景
+	- 示例："熟悉使用 Go"、"掌握 Redis 缓存设计"、"了解 Docker 容器化部署"
+	- 不要只写关键词，必须是描述性语句
+
 	以下是简历文本：
 	%s
 	`, raw)
 
 	// 构建请求
 	req := model.CreateChatCompletionRequest{
-		Model: "doubao-seed-1-6-251015",
+		Model: "deepseek-r1-250528",
 		Messages: []*model.ChatCompletionMessage{
 			{
 				Role: model.ChatMessageRoleUser,
@@ -92,9 +111,12 @@ func (a *agent) ParseResume(ctx context.Context, client *arkruntime.Client, raw 
 
 	// 输出返回的 JSON 格式简历
 	if len(resp.Choices) > 0 && resp.Choices[0].Message.Content.StringValue != nil {
+		// 清理AI返回的JSON（移除markdown代码块标记）
+		cleanedJSON := cleanAIResponse(*resp.Choices[0].Message.Content.StringValue)
+
 		// 将生成的文本转为 JSON 格式
 		var resume domain.Resume
-		err := json.Unmarshal([]byte(*resp.Choices[0].Message.Content.StringValue), &resume)
+		err := json.Unmarshal([]byte(cleanedJSON), &resume)
 		if err != nil {
 			return nil, fmt.Errorf("Error unmarshalling JSON: %v", err)
 		}
@@ -109,37 +131,96 @@ func (a *agent) ParseResume(ctx context.Context, client *arkruntime.Client, raw 
 // AnalyzeGitHubRepo 分析GitHub项目并返回Project结构体
 func (a *agent) AnalyzeGitHubRepo(ctx context.Context, client *arkruntime.Client, repoURL string) (*domain.Project, error) {
 
-	var fileContent string
-	//fileURL := "https://github.com/xkiven/im/blob/main/README.md" // 目标文件URL
 	token := os.Getenv("GITHUB_TOKEN") // 从环境变量获取认证token（公开文件可留空）
 
-	// 尝试获取文件，失败不阻断流程（仅警告）
-	fileContent, err := utils.FetchFile(ctx, repoURL, token)
+	var fileContent string
+	var err error
+	var repoMetadata *utils.GitHubRepoMetadata
+
+	// 策略1: 优先使用GitHub API获取README（更稳定，适合国内网络）
+	fmt.Printf("\n📥 正在通过GitHub API获取README...\n")
+	fileContent, err = utils.FetchREADMEViaAPI(ctx, repoURL, token)
+
+	// 策略2: 如果API失败，降级使用raw.githubusercontent.com
 	if err != nil {
-		fmt.Printf("警告：获取文件失败（非致命错误）：%v\n", err)
-		fileContent = "" // 为空时不影响后续处理
+		fmt.Printf("\n⚠️  GitHub API获取失败: %v\n", err)
+		fmt.Printf("📥 尝试使用raw.githubusercontent.com...\n")
+		fileContent, err = utils.FetchREADME(ctx, repoURL, token)
+		if err != nil {
+			fmt.Printf("\n⚠️  README获取失败: %v\n", err)
+			// 策略3: 尝试获取仓库元数据作为备选
+			fmt.Printf("📥 尝试获取仓库元数据作为备选...\n")
+			repoMetadata, err = utils.FetchRepoMetadata(ctx, repoURL, token)
+			if err != nil {
+				fmt.Printf("⚠️  元数据获取也失败: %v\n", err)
+				fileContent = ""
+			} else {
+				// 使用元数据构建简单的描述
+				fileContent = fmt.Sprintf(`# %s
+
+%s
+
+**主要语言:** %s
+**Stars:** %d
+**Forks:** %d
+**Topics:** %v
+
+仓库地址: %s
+`, repoMetadata.Name, repoMetadata.Description, repoMetadata.Language,
+					repoMetadata.Stars, repoMetadata.Forks, repoMetadata.Topics, repoURL)
+				fmt.Printf("✓ 使用仓库元数据生成描述 (%d字符)\n", len(fileContent))
+			}
+		} else {
+			fmt.Printf("✓ raw URL获取README成功\n")
+		}
+	} else {
+		fmt.Printf("✓ GitHub API获取README成功\n")
 	}
 
 	prompt := fmt.Sprintf(`
-	请分析GitHub仓库中的文件内容（README.md）%s，提取以下信息并以JSON格式返回（符合Project结构体）
-	- name: 项目名称（从URL提取或推断）
-	- role: 留空（或填"开源项目"）
-	- description: 项目技术特点描述（专业语言）
-	- tech_stack: 核心技术栈列表（编程语言、框架、工具等）
-	- highlights: 3-5个技术亮点
-	
-	JSON格式示例：
-	{
-		"name": "xxx项目",
-		"role": "开源项目",
-		"description": "该项目基于...",
-		"tech_stack": ["Go", "Gin", "MySQL"],
-		"highlights": ["高性能...", "模块化设计..."]
-	}
-	`, fileContent)
+请深度分析以下GitHub项目的README.md，提取技术信息用于简历展示。
+
+【项目URL】%s
+
+【README内容】
+%s
+
+【分析要求】
+1. name: 从URL或README提取项目名称（简洁明确）
+2. role: 填写"开源项目"或"个人项目"
+3. description: 100字以内的技术描述，突出架构设计和技术创新点
+4. tech_stack: 完整技术栈列表（包括：编程语言、框架、数据库、中间件、部署工具等）
+5. highlights: 3-5个技术亮点，每个亮点按STAR法则组织（不要写出S/T/A/R字母）：
+   - 背景场景（Situation）：项目面临的技术挑战或业务需求
+   - 任务目标（Task）：需要解决的具体技术问题
+   - 采取方案（Action）：使用的技术方案、架构设计或优化手段
+   - 达成效果（Result）：使用描述性语言说明效果（如"显著提升"、"大幅优化"、"有效改善"等）
+   示例："面对高并发访问需求，采用Redis缓存+分布式锁机制优化数据访问，显著提升了系统吞吐量并大幅降低了响应时间"
+
+【JSON输出格式】（严格按照此格式，不要添加任何markdown标记）
+{
+	"name": "项目名称",
+	"role": "开源项目",
+	"description": "技术架构描述",
+	"tech_stack": ["技术1", "技术2", "技术3"],
+	"highlights": [
+		"亮点1（STAR格式）",
+		"亮点2（STAR格式）",
+		"亮点3（STAR格式）"
+	],
+	"url": "%s"
+}
+
+注意：
+- 只返回JSON，不要添加markdown代码块标记
+- highlights必须体现技术深度，使用描述性语言表达效果
+- 严禁编造或使用具体数字、百分比等量化数据
+- 使用"显著"、"大幅"、"有效"、"明显"等描述性词语代替数字
+- 如果README内容为空，请从URL推断项目基本信息
+`, repoURL, fileContent, repoURL)
 
 	req := model.CreateChatCompletionRequest{
-		Model: "doubao-seed-1-6-251015",
+		Model: "deepseek-r1-250528",
 		Messages: []*model.ChatCompletionMessage{
 			{
 				Role: model.ChatMessageRoleUser,
@@ -159,10 +240,58 @@ func (a *agent) AnalyzeGitHubRepo(ctx context.Context, client *arkruntime.Client
 
 	if len(resp.Choices) > 0 && resp.Choices[0].Message.Content.StringValue != nil {
 		var project domain.Project
-		if err := json.Unmarshal([]byte(*resp.Choices[0].Message.Content.StringValue), &project); err != nil {
+		// 清理AI返回的JSON（移除markdown代码块标记）
+		cleanedJSON := cleanAIResponse(*resp.Choices[0].Message.Content.StringValue)
+		if err := json.Unmarshal([]byte(cleanedJSON), &project); err != nil {
 			return nil, fmt.Errorf("解析结果失败: %v", err)
 		}
+
+		// 清理所有数字和量化数据
+		project.Description = removeNumbers(project.Description)
+		for i := range project.Highlights {
+			project.Highlights[i] = removeNumbers(project.Highlights[i])
+		}
+
 		return &project, nil
 	}
 	return nil, fmt.Errorf("未生成分析结果")
+}
+
+// cleanAIResponse 清理AI返回的JSON字符串，移除markdown代码块标记
+func cleanAIResponse(raw string) string {
+	// 移除markdown代码块标记
+	raw = strings.TrimSpace(raw)
+	raw = strings.TrimPrefix(raw, "```json")
+	raw = strings.TrimPrefix(raw, "```")
+	raw = strings.TrimSuffix(raw, "```")
+	return strings.TrimSpace(raw)
+}
+
+// removeNumbers 清理文本中的所有数字、百分比和量化数据
+func removeNumbers(text string) string {
+	// 1. 清理百分比（90%、大于90%、超过80%等）
+	re1 := regexp.MustCompile(`(大于|小于|超过|达到|约|近)?[\d,]+(\.\d+)?%`)
+	text = re1.ReplaceAllString(text, "较高")
+
+	// 2. 清理数字+单位的组合（10,000+消息/秒、1000次/秒等）
+	re2 := regexp.MustCompile(`[\d,]+\+?(消息|请求|次|个|条|万|千|百)/[^\s,，。；;]+`)
+	text = re2.ReplaceAllString(text, "高并发")
+
+	// 3. 清理量级词（百万级、千万级、十万级等）
+	re3 := regexp.MustCompile(`[十百千万亿]+级`)
+	text = re3.ReplaceAllString(text, "大量")
+
+	// 4. 清理带逗号的大数字（10,000、1,000,000等）
+	re4 := regexp.MustCompile(`[\d,]+\+?`)
+	text = re4.ReplaceAllString(text, "")
+
+	// 5. 清理剩余的纯数字（包括小数）
+	re5 := regexp.MustCompile(`\d+(\.\d+)?`)
+	text = re5.ReplaceAllString(text, "")
+
+	// 6. 清理多余的空格和标点
+	text = regexp.MustCompile(`\s+`).ReplaceAllString(text, " ")
+	text = strings.TrimSpace(text)
+
+	return text
 }

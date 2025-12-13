@@ -1,10 +1,11 @@
 package dao
 
 import (
-	"_ResumeBuilder/internal/domain"
-	"_ResumeBuilder/internal/model"
+	"ResumeBuilder/internal/domain"
+	"ResumeBuilder/internal/model"
 	"context"
 	"encoding/json"
+	"errors"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm/schema"
 	"time"
@@ -170,11 +171,21 @@ func (d *resumeDAO) Get(ctx context.Context, userID string) (*domain.Resume, err
 }
 
 func (d *resumeDAO) Update(ctx context.Context, r *domain.Resume) error {
+	// 先检查记录是否存在
+	var existing model.ResumeModel
+	if err := d.db.Where("user_id = ?", r.UserID).First(&existing).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return errors.New("简历不存在，无法更新")
+		}
+		return err
+	}
+
 	m, err := domainToModel(r)
 	if err != nil {
 		return err
 	}
 
+	// 更新记录
 	if err := d.db.Model(&model.ResumeModel{}).
 		Where("user_id = ?", r.UserID).
 		Updates(m).Error; err != nil {
@@ -189,10 +200,21 @@ func (d *resumeDAO) Update(ctx context.Context, r *domain.Resume) error {
 }
 
 func (d *resumeDAO) Delete(ctx context.Context, userID string) error {
+	// 先检查记录是否存在
+	var existing model.ResumeModel
+	if err := d.db.Where("user_id = ?", userID).First(&existing).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return errors.New("简历不存在，无法删除")
+		}
+		return err
+	}
+
+	// 删除记录
 	if err := d.db.Where("user_id = ?", userID).Delete(&model.ResumeModel{}).Error; err != nil {
 		return err
 	}
 
+	// 删除缓存
 	d.redis.Del(ctx, redisKey(userID))
 	return nil
 }

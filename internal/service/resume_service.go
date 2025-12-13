@@ -1,11 +1,12 @@
 package service
 
 import (
-	"_ResumeBuilder/internal/agent"
-	"_ResumeBuilder/internal/dao"
-	"_ResumeBuilder/internal/domain"
+	"ResumeBuilder/internal/agent"
+	"ResumeBuilder/internal/dao"
+	"ResumeBuilder/internal/domain"
 	"context"
 	"errors"
+	"strings"
 )
 
 type ResumeService interface {
@@ -29,6 +30,9 @@ func NewResumeService(dao dao.ResumeDAO, agent agent.AIAgent) ResumeService {
 }
 
 func (s *resumeService) GetResume(ctx context.Context, userID string) (*domain.Resume, error) {
+	if userID == "" {
+		return nil, errors.New("UserID 不能为空")
+	}
 	return s.dao.Get(ctx, userID)
 }
 
@@ -47,25 +51,39 @@ func (s *resumeService) DeleteResume(ctx context.Context, userID string) error {
 }
 
 func (s *resumeService) GenerateResume(ctx context.Context, raw string, userID string) (*domain.Resume, error) {
+	if userID == "" {
+		return nil, errors.New("UserID 不能为空")
+	}
 	if raw == "" {
 		return nil, errors.New("raw text cannot be empty")
 	}
 
+	// 初始化AI客户端
 	aiClient, err := s.agent.InitializeClient()
 	if err != nil {
-		panic(err)
+		return nil, errors.New("AI客户端初始化失败: " + err.Error())
 	}
 
+	// 解析简历
 	resume, err := s.agent.ParseResume(ctx, aiClient, raw)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("简历解析失败: " + err.Error())
 	}
 
 	resume.UserID = userID
 
-	// 保存数据库
-	if err := s.dao.Create(ctx, resume); err != nil {
-		return nil, err
+	// 检查用户是否已有简历
+	existing, err := s.dao.Get(ctx, userID)
+	if err == nil && existing != nil {
+		// 用户已有简历，更新而不是创建
+		if err := s.dao.Update(ctx, resume); err != nil {
+			return nil, errors.New("简历更新失败: " + err.Error())
+		}
+	} else {
+		// 用户没有简历，创建新的
+		if err := s.dao.Create(ctx, resume); err != nil {
+			return nil, errors.New("简历创建失败: " + err.Error())
+		}
 	}
 
 	return resume, nil
@@ -73,6 +91,13 @@ func (s *resumeService) GenerateResume(ctx context.Context, raw string, userID s
 
 // AnalyzeAndAddGitHubProject 分析GitHub项目并添加到用户简历的Projects中
 func (s *resumeService) AnalyzeAndAddGitHubProject(ctx context.Context, userID, repoURL string) (*domain.Resume, error) {
+	if userID == "" {
+		return nil, errors.New("UserID 不能为空")
+	}
+	if repoURL == "" {
+		return nil, errors.New("仓库地址不能为空")
+	}
+
 	//初始化AI客户端
 	client, err := s.agent.InitializeClient()
 	if err != nil {
@@ -87,17 +112,40 @@ func (s *resumeService) AnalyzeAndAddGitHubProject(ctx context.Context, userID, 
 
 	//获取用户现有简历
 	resume, err := s.dao.Get(ctx, userID)
-	if err != nil {
+	resumeExists := err == nil
+
+	if !resumeExists {
 		// 若用户无简历，初始化一个新简历
 		resume = &domain.Resume{UserID: userID}
+	}
+
+	// 检查项目是否已存在（通过URL或名称）
+	normalizedURL := strings.TrimSuffix(strings.ToLower(repoURL), "/")
+	for _, p := range resume.Projects {
+		// 通过URL匹配（URL可能为空，需要判断）
+		if p.URL != "" && strings.TrimSuffix(strings.ToLower(p.URL), "/") == normalizedURL {
+			return nil, errors.New("该GitHub项目已存在于简历中（URL重复）")
+		}
+		// 通过项目名称匹配（名称相同且都非空）
+		if p.Name != "" && project.Name != "" && strings.EqualFold(p.Name, project.Name) {
+			return nil, errors.New("同名项目已存在于简历中")
+		}
 	}
 
 	// 将分析结果添加到Projects列表
 	resume.Projects = append(resume.Projects, *project)
 
 	// 保存更新后的简历
-	if err := s.dao.Update(ctx, resume); err != nil {
-		return nil, err
+	if resumeExists {
+		// 更新现有简历
+		if err := s.dao.Update(ctx, resume); err != nil {
+			return nil, err
+		}
+	} else {
+		// 创建新简历
+		if err := s.dao.Create(ctx, resume); err != nil {
+			return nil, err
+		}
 	}
 
 	return resume, nil

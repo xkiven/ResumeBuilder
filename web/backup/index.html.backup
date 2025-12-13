@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能简历生成器</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- 粒子背景动画 -->
+    <div class="particles-background">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
+    <div class="container">
+        <!-- 头部 -->
+        <header class="header">
+            <h1>🎯 智能简历生成器</h1>
+            <p class="subtitle">基于AI技术，快速生成专业简历</p>
+        </header>
+
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <!-- 左侧输入区 -->
+            <section class="input-section">
+                <div class="card">
+                    <h2>📝 输入信息</h2>
+
+                    <!-- 用户ID -->
+                    <div class="form-group">
+                        <label for="userID">用户ID</label>
+                        <input
+                            type="text"
+                            id="userID"
+                            placeholder="请输入您的用户ID"
+                        />
+                    </div>
+
+                    <!-- 分步输入区域 -->
+                    <div class="step-input-container">
+                        <!-- 基本信息 -->
+                        <div class="input-step">
+                            <h3 class="step-title">👤 基本信息</h3>
+                            <div class="step-content">
+                                <input type="text" id="name" placeholder="姓名" class="mini-input" />
+                                <input type="email" id="email" placeholder="邮箱" class="mini-input" />
+                                <input type="tel" id="phone" placeholder="电话" class="mini-input" />
+                            </div>
+                        </div>
+
+                        <!-- 教育背景 -->
+                        <div class="input-step">
+                            <h3 class="step-title">🎓 教育背景</h3>
+                            <div class="step-content">
+                                <input type="text" id="education" placeholder="例如：北京大学，计算机科学，本科，2015-2019" class="mini-input" />
+                            </div>
+                        </div>
+
+                        <!-- 工作经历 -->
+                        <div class="input-step">
+                            <h3 class="step-title">💼 工作经历</h3>
+                            <div class="step-content">
+                                <textarea id="experience" rows="3" placeholder="例如：&#10;腾讯科技，高级开发工程师，2019-2023，负责微信后端开发&#10;字节跳动，开发工程师，2023至今，负责抖音推荐系统" class="mini-textarea"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- 技能特长 -->
+                        <div class="input-step">
+                            <h3 class="step-title">⚡ 技能特长</h3>
+                            <div class="step-content">
+                                <input type="text" id="skills" placeholder="例如：Go、Python、Docker、Kubernetes" class="mini-input" />
+                            </div>
+                        </div>
+
+                        <!-- 项目经验（可选） -->
+                        <div class="input-step">
+                            <h3 class="step-title">🚀 项目经验（可选）</h3>
+                            <div class="step-content">
+                                <textarea id="projects" rows="2" placeholder="例如：开发了高并发消息系统，日均处理10亿条消息" class="mini-textarea"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- GitHub仓库链接 -->
+                    <div class="form-group">
+                        <label for="githubURL">GitHub 仓库链接（可选）</label>
+                        <input
+                            type="url"
+                            id="githubURL"
+                            placeholder="https://github.com/username/repo"
+                        />
+                        <small class="helper-text">添加您的GitHub项目，AI将自动分析并添加到简历</small>
+                    </div>
+
+                    <!-- 操作按钮 -->
+                    <div class="button-group">
+                        <button id="generateBtn" class="btn btn-primary">
+                            <span class="btn-icon">✨</span>
+                            生成简历
+                        </button>
+                        <button id="saveBtn" class="btn btn-success" style="display: none;">
+                            <span class="btn-icon">💾</span>
+                            保存修改
+                        </button>
+                        <button id="addGithubBtn" class="btn btn-secondary">
+                            <span class="btn-icon">🔗</span>
+                            添加GitHub项目
+                        </button>
+                        <button id="loadBtn" class="btn btn-outline">
+                            <span class="btn-icon">📂</span>
+                            加载已有简历
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 右侧展示区 -->
+            <section class="display-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>📄 简历预览</h2>
+                        <div class="export-buttons">
+                            <button id="exportPDFBtn" class="btn btn-small" title="导出为PDF">
+                                📥 PDF
+                            </button>
+                            <button id="exportJSONBtn" class="btn btn-small" title="导出为JSON">
+                                📥 JSON
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 加载状态 -->
+                    <div id="loadingState" class="loading-state" style="display: none;">
+                        <div class="spinner"></div>
+                        <p>正在生成简历，请稍候...</p>
+                    </div>
+
+                    <!-- 空状态 -->
+                    <div id="emptyState" class="empty-state">
+                        <div class="empty-icon">📭</div>
+                        <p>暂无简历数据</p>
+                        <small>请先输入信息并点击"生成简历"</small>
+                    </div>
+
+                    <!-- 简历内容 -->
+                    <div id="resumeContent" class="resume-content" style="display: none;">
+                        <!-- 基本信息 -->
+                        <section class="resume-section" id="basicInfoSection">
+                            <h3>👤 基本信息</h3>
+                            <div id="basicInfoContent"></div>
+                        </section>
+
+                        <!-- 教育背景 -->
+                        <section class="resume-section" id="educationSection">
+                            <h3>🎓 教育背景</h3>
+                            <div id="educationContent"></div>
+                        </section>
+
+                        <!-- 工作经历 -->
+                        <section class="resume-section" id="experienceSection">
+                            <h3>💼 工作经历</h3>
+                            <div id="experienceContent"></div>
+                        </section>
+
+                        <!-- 项目经验 -->
+                        <section class="resume-section" id="projectsSection">
+                            <h3>🚀 项目经验</h3>
+                            <div id="projectsContent"></div>
+                        </section>
+
+                        <!-- 技能特长 -->
+                        <section class="resume-section" id="skillsSection">
+                            <h3>⚡ 技能特长</h3>
+                            <div id="skillsContent"></div>
+                        </section>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Toast通知 -->
+    <div id="toast" class="toast"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>

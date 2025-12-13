@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能简历生成器</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- 粒子背景动画 -->
+    <div class="particles-background">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
+    <div class="container">
+        <!-- 头部 -->
+        <header class="header">
+            <h1>🎯 智能简历生成器</h1>
+            <p class="subtitle">分步填写，轻松生成专业简历</p>
+        </header>
+
+        <!-- 进度条 -->
+        <div class="progress-bar">
+            <div class="progress-step active" data-step="1">
+                <div class="step-circle">1</div>
+                <div class="step-label">用户信息</div>
+            </div>
+            <div class="progress-line"></div>
+            <div class="progress-step" data-step="2">
+                <div class="step-circle">2</div>
+                <div class="step-label">基本信息</div>
+            </div>
+            <div class="progress-line"></div>
+            <div class="progress-step" data-step="3">
+                <div class="step-circle">3</div>
+                <div class="step-label">教育背景</div>
+            </div>
+            <div class="progress-line"></div>
+            <div class="progress-step" data-step="4">
+                <div class="step-circle">4</div>
+                <div class="step-label">工作经历</div>
+            </div>
+            <div class="progress-line"></div>
+            <div class="progress-step" data-step="5">
+                <div class="step-circle">5</div>
+                <div class="step-label">技能项目</div>
+            </div>
+            <div class="progress-line"></div>
+            <div class="progress-step" data-step="6">
+                <div class="step-circle">6</div>
+                <div class="step-label">预览生成</div>
+            </div>
+        </div>
+
+        <!-- 主卡片 -->
+        <div class="main-card">
+            <!-- 步骤1: 用户信息 -->
+            <div class="form-step active" id="step1">
+                <h2>👤 用户信息</h2>
+                <p class="step-description">请输入您的用户ID，用于保存和管理简历</p>
+
+                <div class="form-group">
+                    <label for="userID">用户ID</label>
+                    <input type="text" id="userID" placeholder="例如: user123" required />
+                </div>
+
+                <div class="form-group">
+                    <label>已有简历？</label>
+                    <button type="button" id="loadExistingBtn" class="btn btn-outline">
+                        📂 加载已有简历
+                    </button>
+                    <small class="helper-text">如果您之前创建过简历，可以点击加载并编辑</small>
+                </div>
+            </div>
+
+            <!-- 步骤2: 基本信息 -->
+            <div class="form-step" id="step2">
+                <h2>📝 基本信息</h2>
+                <p class="step-description">填写您的个人基本信息</p>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="name">姓名 <span class="required">*</span></label>
+                        <input type="text" id="name" placeholder="张三" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">邮箱 <span class="required">*</span></label>
+                        <input type="email" id="email" placeholder="zhangsan@example.com" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">电话</label>
+                        <input type="tel" id="phone" placeholder="13812345678" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="location">所在地</label>
+                        <input type="text" id="location" placeholder="北京市朝阳区" />
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="title">职位/职称</label>
+                        <input type="text" id="title" placeholder="高级软件工程师" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- 步骤3: 教育背景 -->
+            <div class="form-step" id="step3">
+                <h2>🎓 教育背景</h2>
+                <p class="step-description">填写您的教育经历（可添加多条）</p>
+
+                <div id="educationList"></div>
+                <button type="button" id="addEducationBtn" class="btn btn-outline btn-add">
+                    ➕ 添加教育经历
+                </button>
+            </div>
+
+            <!-- 步骤4: 工作经历 -->
+            <div class="form-step" id="step4">
+                <h2>💼 工作经历</h2>
+                <p class="step-description">填写您的工作经验（可添加多条）</p>
+
+                <div id="experienceList"></div>
+                <button type="button" id="addExperienceBtn" class="btn btn-outline btn-add">
+                    ➕ 添加工作经历
+                </button>
+            </div>
+
+            <!-- 步骤5: 技能与项目 -->
+            <div class="form-step" id="step5">
+                <h2>⚡ 技能与项目</h2>
+                <p class="step-description">展示您的专业技能和项目经验</p>
+
+                <!-- 技能 -->
+                <div class="form-section">
+                    <h3>技能特长</h3>
+                    <div class="form-group">
+                        <label for="skills">技能列表</label>
+                        <input type="text" id="skills" placeholder="用逗号分隔，例如: Go, Python, Docker, Kubernetes" />
+                        <small class="helper-text">输入技能名称，用逗号或顿号分隔</small>
+                    </div>
+                </div>
+
+                <!-- 项目经验 -->
+                <div class="form-section">
+                    <h3>项目经验</h3>
+                    <div id="projectsList"></div>
+                    <button type="button" id="addProjectBtn" class="btn btn-outline btn-add">
+                        ➕ 添加项目
+                    </button>
+                </div>
+
+                <!-- GitHub -->
+                <div class="form-section">
+                    <h3>GitHub 项目</h3>
+                    <div class="form-group">
+                        <label for="githubURL">GitHub 仓库链接</label>
+                        <input type="url" id="githubURL" placeholder="https://github.com/username/repo" />
+                        <small class="helper-text">AI会自动分析并提取项目信息</small>
+                    </div>
+                    <button type="button" id="addGithubBtn" class="btn btn-secondary">
+                        🔗 分析并添加
+                    </button>
+                </div>
+            </div>
+
+            <!-- 步骤6: 预览与生成 -->
+            <div class="form-step" id="step6">
+                <h2>📄 预览与生成</h2>
+                <p class="step-description">检查您的简历信息，确认无误后生成</p>
+
+                <!-- 预览区域 -->
+                <div class="preview-container">
+                    <div id="previewContent" class="preview-content"></div>
+                </div>
+
+                <!-- 生成按钮 -->
+                <div class="generate-actions">
+                    <button type="button" id="generateBtn" class="btn btn-primary btn-large">
+                        ✨ 生成简历
+                    </button>
+                    <button type="button" id="saveBtn" class="btn btn-success btn-large" style="display: none;">
+                        💾 保存修改
+                    </button>
+                </div>
+
+                <!-- 简历展示 -->
+                <div id="resumeDisplay" style="display: none;">
+                    <div class="divider"></div>
+                    <h3>✅ 生成的简历</h3>
+                    <div id="resumeContent" class="resume-content"></div>
+
+                    <!-- 导出按钮 -->
+                    <div class="export-actions">
+                        <button type="button" id="exportPDFBtn" class="btn btn-outline">
+                            📥 导出PDF
+                        </button>
+                        <button type="button" id="exportJSONBtn" class="btn btn-outline">
+                            📥 导出JSON
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 导航按钮 -->
+            <div class="navigation-buttons">
+                <button type="button" id="prevBtn" class="btn btn-outline" style="display: none;">
+                    ← 上一步
+                </button>
+                <button type="button" id="nextBtn" class="btn btn-primary">
+                    下一步 →
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast通知 -->
+    <div id="toast" class="toast"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
