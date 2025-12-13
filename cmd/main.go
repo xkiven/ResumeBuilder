@@ -27,8 +27,8 @@ func main() {
 	}
 	log.Println("✅ API Key已配置")
 
-	// 初始化服务
-	db := dao.NewResumeDAO()
+	// 初始化服务（使用文件存储）
+	db := dao.NewFileResumeDAO()
 	aiAgent := agent.NewAIAgent()
 	resumeService := service.NewResumeService(db, aiAgent)
 	resumeController := controller.NewResumeController(resumeService)

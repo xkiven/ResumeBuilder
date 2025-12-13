@@ -32,3 +32,6 @@ Thumbs.db
 # 临时文件
 tmp/
 temp/
+
+# 数据文件（简历存储）
+data/
