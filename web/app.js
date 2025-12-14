@@ -315,11 +315,11 @@ function collectFormData() {
         const school = item.querySelector('[name="school"]').value.trim();
         const major = item.querySelector('[name="major"]').value.trim();
         const degree = item.querySelector('[name="degree"]').value.trim();
-        const dateRange = item.querySelector('[name="date_range"]').value.trim();
-        const [startDate, endDate] = dateRange.split('-').map(s => s.trim());
+        const startDate = item.querySelector('[name="start_date"]').value.trim();
+        const endDate = item.querySelector('[name="end_date"]').value.trim();
 
         if (school || major) {
-            educations.push({ school, major, degree, start_date: startDate || '', end_date: endDate || '' });
+            educations.push({ school, major, degree, start_date: startDate, end_date: endDate });
         }
     });
 
@@ -328,10 +328,10 @@ function collectFormData() {
     document.querySelectorAll('#experienceList .dynamic-item').forEach(item => {
         const company = item.querySelector('[name="company"]').value.trim();
         const position = item.querySelector('[name="position"]').value.trim();
-        const dateRange = item.querySelector('[name="date_range"]').value.trim();
+        const startDate = item.querySelector('[name="start_date"]').value.trim();
+        const endDate = item.querySelector('[name="end_date"]').value.trim();
         const description = item.querySelector('[name="description"]').value.trim();
         const achievementsText = item.querySelector('[name="achievements"]').value.trim();
-        const [startDate, endDate] = dateRange.split('-').map(s => s.trim());
         const achievements = achievementsText ? achievementsText.split('\n').filter(a => a.trim()) : [];
 
         if (company || position) {

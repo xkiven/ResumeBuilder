@@ -87,7 +87,7 @@ const ResumeTemplates = {
                 <div class="classic-section">
                     <h2 class="classic-section-title">技能特长</h2>
                     <ul class="classic-skills-list">
-                        ${resume.skills.map(skill => `<li>${this._enhanceSkill(skill)}</li>`).join('')}
+                        ${resume.skills.map(skill => `<li>${skill}</li>`).join('')}
                     </ul>
                 </div>
             `;
@@ -158,7 +158,7 @@ const ResumeTemplates = {
             html += `
                 <div class="modern-skills">
                     <h3 class="modern-sidebar-title">技能特长</h3>
-                    ${resume.skills.map(skill => `<div class="modern-skill-item">${this._enhanceSkill(skill)}</div>`).join('')}
+                    ${resume.skills.map(skill => `<div class="modern-skill-item">${skill}</div>`).join('')}
                 </div>
             `;
         }
@@ -251,7 +251,7 @@ const ResumeTemplates = {
                 <div class="minimal-section">
                     <h2>技能特长</h2>
                     <ul class="minimal-skills-list">
-                        ${resume.skills.map(skill => `<li>${this._enhanceSkill(skill)}</li>`).join('')}
+                        ${resume.skills.map(skill => `<li>${skill}</li>`).join('')}
                     </ul>
                 </div>
             `;
