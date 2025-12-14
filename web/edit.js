@@ -204,6 +204,11 @@ function fillForm(resume) {
         resume.education.forEach(edu => addEducation(edu));
     }
 
+    // 校园经历
+    if (resume.campus_experience && resume.campus_experience.length > 0) {
+        resume.campus_experience.forEach(exp => addCampusExperience(exp));
+    }
+
     // 工作经历
     if (resume.experience && resume.experience.length > 0) {
         resume.experience.forEach(exp => addExperience(exp));
@@ -259,6 +264,41 @@ function addEducation(data = {}) {
     `;
 
     document.getElementById('educationList').insertAdjacentHTML('beforeend', html);
+    attachInputListeners(`#${id}`);
+}
+
+// 添加校园经历
+let campusExperienceCount = 0;
+
+function addCampusExperience(data = {}) {
+    campusExperienceCount++;
+    const id = `campus-${campusExperienceCount}`;
+
+    const html = `
+        <div class="dynamic-item" id="${id}" data-type="campus_experience">
+            <button type="button" class="remove-btn" onclick="removeItem('${id}')">×</button>
+            <div class="form-grid">
+                <div class="form-group full-width">
+                    <label>经历标题</label>
+                    <input type="text" name="title" placeholder="例如: 全国大学生数学建模竞赛 国家级一等奖" value="${data.title || ''}" />
+                </div>
+                <div class="form-group">
+                    <label>时间</label>
+                    <input type="text" name="date" placeholder="例如: 2023.05" value="${data.date || ''}" />
+                </div>
+                <div class="form-group">
+                    <label>组织/单位</label>
+                    <input type="text" name="organization" placeholder="例如: 校学生会、ACM协会" value="${data.organization || ''}" />
+                </div>
+                <div class="form-group full-width">
+                    <label>详细描述（选填）</label>
+                    <textarea name="description" rows="2" placeholder="可以描述您的角色、职责或成就等">${data.description || ''}</textarea>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('campusExperienceList').insertAdjacentHTML('beforeend', html);
     attachInputListeners(`#${id}`);
 }
 
@@ -401,6 +441,7 @@ function bindEvents() {
 
     // 添加按钮
     document.getElementById('addEducationBtn').addEventListener('click', () => addEducation());
+    document.getElementById('addCampusExperienceBtn').addEventListener('click', () => addCampusExperience());
     document.getElementById('addExperienceBtn').addEventListener('click', () => addExperience());
     document.getElementById('addProjectBtn').addEventListener('click', () => addProject());
     document.getElementById('addSkillBtn').addEventListener('click', () => addSkill());
@@ -464,6 +505,7 @@ function collectFormData() {
         user_id: currentUserID,
         basic_info: [],
         education: [],
+        campus_experience: [],
         experience: [],
         skills: [],
         projects: []
@@ -490,6 +532,18 @@ function collectFormData() {
 
         if (school || major) {
             data.education.push({ school, major, degree, start_date, end_date });
+        }
+    });
+
+    // 校园经历
+    document.querySelectorAll('#campusExperienceList .dynamic-item').forEach(item => {
+        const title = item.querySelector('[name="title"]').value.trim();
+        const date = item.querySelector('[name="date"]').value.trim();
+        const organization = item.querySelector('[name="organization"]').value.trim();
+        const description = item.querySelector('[name="description"]').value.trim();
+
+        if (title) {
+            data.campus_experience.push({ title, date, organization, description });
         }
     });
 
@@ -773,28 +827,70 @@ async function exportPDF() {
 
         const element = document.getElementById('resumePreview');
 
-        // PDF 配置选项
+        // 保存原始样式
+        const originalBoxShadow = element.style.boxShadow;
+        const originalBorderRadius = element.style.borderRadius;
+        const originalTransform = element.style.transform;
+        const originalTransformOrigin = element.style.transformOrigin;
+        const originalWidth = element.style.width;
+        const originalLineHeight = element.style.lineHeight;
+        const originalLetterSpacing = element.style.letterSpacing;
+
+        // 移除阴影、圆角
+        element.style.boxShadow = 'none';
+        element.style.borderRadius = '0';
+
+        // 增加行高和字间距以改善可读性
+        element.style.lineHeight = '1.5';
+        element.style.letterSpacing = '0.2px';
+
+        // 计算缩放比例以适应单页（保留所有内容）
+        const contentHeight = element.scrollHeight;
+        const a4HeightPx = 1050;  // A4可用高度（考虑边距）
+
+        let scaleFactor = 1;
+        if (contentHeight > a4HeightPx) {
+            scaleFactor = a4HeightPx / contentHeight;
+            // 应用缩放
+            element.style.transform = `scale(${scaleFactor})`;
+            element.style.transformOrigin = 'top left';
+            element.style.width = `${100 / scaleFactor}%`;
+        }
+
+        // PDF 配置选项（固定一页）
         const opt = {
-            margin: [10, 10, 10, 10],  // 上右下左边距（毫米）
+            margin: [10, 10, 10, 10],
             filename: `resume_${data.basic_info[0].name}_${Date.now()}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: {
-                scale: 2,  // 提高清晰度
+                scale: 2.5,
                 useCORS: true,
-                letterRendering: true
+                letterRendering: true,
+                scrollY: 0,
+                scrollX: 0
             },
             jsPDF: {
                 unit: 'mm',
                 format: 'a4',
-                orientation: 'portrait'  // 纵向
+                orientation: 'portrait',
+                compress: true
             },
             pagebreak: {
-                mode: ['avoid-all', 'css', 'legacy']  // 智能分页
+                mode: 'avoid-all'
             }
         };
 
         // 生成 PDF
         await html2pdf().set(opt).from(element).save();
+
+        // 恢复原始样式
+        element.style.boxShadow = originalBoxShadow;
+        element.style.borderRadius = originalBorderRadius;
+        element.style.transform = originalTransform;
+        element.style.transformOrigin = originalTransformOrigin;
+        element.style.width = originalWidth;
+        element.style.lineHeight = originalLineHeight;
+        element.style.letterSpacing = originalLetterSpacing;
 
         showToast('✅ PDF 导出成功！', 'success');
     } catch (error) {

@@ -128,12 +128,19 @@
             <!-- 步骤3: 教育背景 -->
             <div class="form-step" id="step3">
                 <h2>🎓 教育背景</h2>
-                <p class="step-description">填写您的教育经历（可添加多条）</p>
+                <p class="step-description">填写您的教育经历和校园经历（可添加多条）</p>
 
                 <div id="educationList"></div>
-                <button type="button" id="addEducationBtn" class="btn btn-outline btn-add">
-                    ➕ 添加教育经历
-                </button>
+                <div id="campusExperienceList"></div>
+
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <button type="button" id="addEducationBtn" class="btn btn-outline btn-add">
+                        ➕ 添加教育经历
+                    </button>
+                    <button type="button" id="addCampusExperienceBtn" class="btn btn-outline btn-add">
+                        ➕ 添加校园经历
+                    </button>
+                </div>
             </div>
 
             <!-- 步骤4: 工作经历 -->
@@ -238,6 +245,8 @@
     <!-- Toast通知 -->
     <div id="toast" class="toast"></div>
 
+    <!-- html2pdf.js 库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

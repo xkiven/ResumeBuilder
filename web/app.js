@@ -208,6 +208,41 @@ function addEducation(data = {}) {
     document.getElementById('educationList').insertAdjacentHTML('beforeend', html);
 }
 
+// 校园经历
+let campusExperienceCount = 0;
+
+function addCampusExperience(data = {}) {
+    campusExperienceCount++;
+    const id = `campus-${campusExperienceCount}`;
+    const html = `
+        <div class="dynamic-item" id="${id}">
+            <div class="item-header">
+                <span class="item-title">校园经历 ${campusExperienceCount}</span>
+                <button type="button" class="btn-remove" onclick="removeItem('${id}')">删除</button>
+            </div>
+            <div class="form-grid">
+                <div class="form-group full-width">
+                    <label>经历标题</label>
+                    <input type="text" name="title" placeholder="例如: 全国大学生数学建模竞赛 国家级一等奖" value="${data.title || ''}" />
+                </div>
+                <div class="form-group">
+                    <label>时间</label>
+                    <input type="text" name="date" placeholder="例如: 2023.05" value="${data.date || ''}" />
+                </div>
+                <div class="form-group">
+                    <label>组织/单位</label>
+                    <input type="text" name="organization" placeholder="例如: 校学生会、ACM协会" value="${data.organization || ''}" />
+                </div>
+                <div class="form-group full-width">
+                    <label>详细描述（选填）</label>
+                    <textarea name="description" rows="2" placeholder="可以描述您的角色、职责或成就等">${data.description || ''}</textarea>
+                </div>
+            </div>
+        </div>
+    `;
+    document.getElementById('campusExperienceList').insertAdjacentHTML('beforeend', html);
+}
+
 // 工作经历
 let experienceCount = 0;
 
@@ -323,6 +358,19 @@ function collectFormData() {
         }
     });
 
+    // 收集校园经历
+    const campusExperiences = [];
+    document.querySelectorAll('#campusExperienceList .dynamic-item').forEach(item => {
+        const title = item.querySelector('[name="title"]').value.trim();
+        const date = item.querySelector('[name="date"]').value.trim();
+        const organization = item.querySelector('[name="organization"]').value.trim();
+        const description = item.querySelector('[name="description"]').value.trim();
+
+        if (title) {
+            campusExperiences.push({ title, date, organization, description });
+        }
+    });
+
     // 收集工作经历
     const experiences = [];
     document.querySelectorAll('#experienceList .dynamic-item').forEach(item => {
@@ -359,6 +407,7 @@ function collectFormData() {
         user_id: userID,
         basic_info: [{ name, email, phone, location, title }],
         education: educations,
+        campus_experience: campusExperiences,
         experience: experiences,
         projects: projects,
         skills: skills ? skills.split(/[,，、]/).map(s => s.trim()).filter(s => s) : []
@@ -388,6 +437,15 @@ function generatePreview() {
         html += `<div class="preview-section"><h4>🎓 教育背景</h4>`;
         data.education.forEach(edu => {
             html += `<div class="preview-item">${edu.school} - ${edu.major} (${edu.degree}) ${edu.start_date}-${edu.end_date}</div>`;
+        });
+        html += `</div>`;
+    }
+
+    // 校园经历
+    if (data.campus_experience && data.campus_experience.length > 0) {
+        html += `<div class="preview-section"><h4>🏆 校园经历</h4>`;
+        data.campus_experience.forEach(exp => {
+            html += `<div class="preview-item">${exp.title}${exp.date ? ` (${exp.date})` : ''}${exp.organization ? ` - ${exp.organization}` : ''}</div>`;
         });
         html += `</div>`;
     }
@@ -682,9 +740,87 @@ function exportJSON() {
     showToast('JSON导出成功！', 'success');
 }
 
-function exportPDF() {
-    window.print();
-    showToast('请在打印对话框中选择"另存为PDF"', 'info');
+async function exportPDF() {
+    // 检查是否有简历内容
+    const resumeContent = document.getElementById('resumeContent');
+    if (!resumeContent || !resumeContent.innerHTML.trim()) {
+        showToast('❌ 请先生成简历后再导出', 'error');
+        return;
+    }
+
+    try {
+        showToast('📄 正在生成PDF，请稍候...', 'info');
+
+        const element = resumeContent;
+        const userName = document.getElementById('name').value.trim() || 'resume';
+
+        // 保存原始样式
+        const originalBoxShadow = element.style.boxShadow;
+        const originalTransform = element.style.transform;
+        const originalTransformOrigin = element.style.transformOrigin;
+        const originalWidth = element.style.width;
+        const originalLineHeight = element.style.lineHeight;
+        const originalLetterSpacing = element.style.letterSpacing;
+
+        // 移除阴影
+        element.style.boxShadow = 'none';
+
+        // 增加行高和字间距以改善可读性
+        element.style.lineHeight = '1.5';
+        element.style.letterSpacing = '0.2px';
+
+        // 计算缩放比例以适应单页（保留所有内容）
+        const contentHeight = element.scrollHeight;
+        const a4HeightPx = 1050;  // A4可用高度（考虑边距）
+
+        let scaleFactor = 1;
+        if (contentHeight > a4HeightPx) {
+            scaleFactor = a4HeightPx / contentHeight;
+            // 应用缩放
+            element.style.transform = `scale(${scaleFactor})`;
+            element.style.transformOrigin = 'top left';
+            element.style.width = `${100 / scaleFactor}%`;
+        }
+
+        // PDF 配置选项（固定一页）
+        const opt = {
+            margin: [10, 10, 10, 10],
+            filename: `${userName}_${Date.now()}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: {
+                scale: 2.5,
+                useCORS: true,
+                letterRendering: true,
+                scrollY: 0,
+                scrollX: 0
+            },
+            jsPDF: {
+                unit: 'mm',
+                format: 'a4',
+                orientation: 'portrait',
+                compress: true
+            },
+            pagebreak: {
+                mode: 'avoid-all'
+            }
+        };
+
+        // 生成 PDF
+        await html2pdf().set(opt).from(element).save();
+
+        // 恢复原始样式
+        element.style.boxShadow = originalBoxShadow;
+        element.style.transform = originalTransform;
+        element.style.transformOrigin = originalTransformOrigin;
+        element.style.width = originalWidth;
+        element.style.lineHeight = originalLineHeight;
+        element.style.letterSpacing = originalLetterSpacing;
+
+        showToast('✅ PDF 导出成功！', 'success');
+    } catch (error) {
+        showToast(`❌ PDF 导出失败: ${error.message}`, 'error');
+        console.error('PDF导出失败:', error);
+    }
 }
 
 // ========== 事件绑定 ==========
@@ -692,6 +828,7 @@ function exportPDF() {
 document.getElementById('prevBtn').addEventListener('click', prevStep);
 document.getElementById('nextBtn').addEventListener('click', nextStep);
 document.getElementById('addEducationBtn').addEventListener('click', () => addEducation());
+document.getElementById('addCampusExperienceBtn').addEventListener('click', () => addCampusExperience());
 document.getElementById('addExperienceBtn').addEventListener('click', () => addExperience());
 document.getElementById('addProjectBtn').addEventListener('click', () => addProject());
 document.getElementById('generateBtn').addEventListener('click', generateResume);

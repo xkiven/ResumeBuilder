@@ -68,18 +68,45 @@ const ResumeTemplates = {
             }
         }
 
-        // 教育背景
-        html += this._renderSection(resume.education, 'education', '教育背景', (edu) => `
-            <div class="classic-item">
-                <div class="classic-item-header">
-                    <strong>${edu.school || ''}</strong>
-                    <span class="classic-date">${this._formatDateRange(edu.start_date, edu.end_date)}</span>
-                </div>
-                <div class="classic-item-info">
-                    ${edu.major ? `${edu.major}` : ''}${edu.degree ? ` · ${edu.degree}` : ''}
-                </div>
-            </div>
-        `);
+        // 教育背景（包含校园经历）
+        if ((resume.education && resume.education.length > 0) || (resume.campus_experience && resume.campus_experience.length > 0)) {
+            html += '<div class="classic-section"><h2 class="classic-section-title">教育背景</h2>';
+
+            // 教育经历
+            if (resume.education && resume.education.length > 0) {
+                resume.education.forEach(edu => {
+                    html += `
+                        <div class="classic-item">
+                            <div class="classic-item-header">
+                                <strong>${edu.school || ''}</strong>
+                                <span class="classic-date">${this._formatDateRange(edu.start_date, edu.end_date)}</span>
+                            </div>
+                            <div class="classic-item-info">
+                                ${edu.major ? `${edu.major}` : ''}${edu.degree ? ` · ${edu.degree}` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            // 校园经历（无单独标题）
+            if (resume.campus_experience && resume.campus_experience.length > 0) {
+                resume.campus_experience.forEach(exp => {
+                    html += `
+                        <div class="classic-item">
+                            <div class="classic-item-header">
+                                <strong>${exp.title || ''}</strong>
+                                ${exp.date ? `<span class="classic-date">${exp.date}</span>` : ''}
+                            </div>
+                            ${exp.organization ? `<div class="classic-item-info">${exp.organization}</div>` : ''}
+                            ${exp.description ? `<div class="classic-item-description">${exp.description}</div>` : ''}
+                        </div>
+                    `;
+                });
+            }
+
+            html += '</div>';
+        }
 
         // 技能特长
         if (resume.skills && resume.skills.length > 0) {
@@ -87,7 +114,7 @@ const ResumeTemplates = {
                 <div class="classic-section">
                     <h2 class="classic-section-title">技能特长</h2>
                     <ul class="classic-skills-list">
-                        ${resume.skills.map(skill => `<li>${skill}</li>`).join('')}
+                        ${resume.skills.map(skill => `<li>${this._boldPrefix(skill)}</li>`).join('')}
                     </ul>
                 </div>
             `;
@@ -110,13 +137,13 @@ const ResumeTemplates = {
             <div class="classic-item">
                 <strong>${proj.name || ''}</strong>
                 ${proj.role ? `<span class="classic-role"> - ${proj.role}</span>` : ''}
-                ${proj.description ? `<div class="classic-desc">${proj.description}</div>` : ''}
+                ${proj.description ? `<div class="classic-desc">${this._boldPrefix(proj.description)}</div>` : ''}
                 ${proj.tech_stack && proj.tech_stack.length > 0 ? `
-                    <div class="classic-tech">技术栈: ${proj.tech_stack.join(', ')}</div>
+                    <div class="classic-tech"><strong>技术栈:</strong> ${proj.tech_stack.join(', ')}</div>
                 ` : ''}
                 ${proj.highlights && proj.highlights.length > 0 ? `
                     <ul class="classic-highlights">
-                        ${proj.highlights.map(h => `<li>${h}</li>`).join('')}
+                        ${proj.highlights.map(h => `<li>${this._boldPrefix(h)}</li>`).join('')}
                     </ul>
                 ` : ''}
             </div>
@@ -158,7 +185,7 @@ const ResumeTemplates = {
             html += `
                 <div class="modern-skills">
                     <h3 class="modern-sidebar-title">技能特长</h3>
-                    ${resume.skills.map(skill => `<div class="modern-skill-item">${skill}</div>`).join('')}
+                    ${resume.skills.map(skill => `<div class="modern-skill-item">${this._boldPrefix(skill)}</div>`).join('')}
                 </div>
             `;
         }
@@ -168,18 +195,45 @@ const ResumeTemplates = {
         // 右侧主内容
         html += '<div class="modern-main">';
 
-        // 教育背景
-        html += this._renderSection(resume.education, 'education', '教育背景', (edu) => `
-            <div class="modern-item">
-                <div class="modern-item-header">
-                    <strong>${edu.school || ''}</strong>
-                    <div class="modern-date">${this._formatDateRange(edu.start_date, edu.end_date)}</div>
-                </div>
-                <div class="modern-subtitle">
-                    ${edu.major ? `${edu.major}` : ''}${edu.degree ? ` · ${edu.degree}` : ''}
-                </div>
-            </div>
-        `, 'modern-section');
+        // 教育背景（包含校园经历）
+        if ((resume.education && resume.education.length > 0) || (resume.campus_experience && resume.campus_experience.length > 0)) {
+            html += '<div class="modern-section"><h3>教育背景</h3>';
+
+            // 教育经历
+            if (resume.education && resume.education.length > 0) {
+                resume.education.forEach(edu => {
+                    html += `
+                        <div class="modern-item">
+                            <div class="modern-item-header">
+                                <strong>${edu.school || ''}</strong>
+                                <div class="modern-date">${this._formatDateRange(edu.start_date, edu.end_date)}</div>
+                            </div>
+                            <div class="modern-subtitle">
+                                ${edu.major ? `${edu.major}` : ''}${edu.degree ? ` · ${edu.degree}` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            // 校园经历（无单独标题）
+            if (resume.campus_experience && resume.campus_experience.length > 0) {
+                resume.campus_experience.forEach(exp => {
+                    html += `
+                        <div class="modern-item">
+                            <div class="modern-item-header">
+                                <strong>${exp.title || ''}</strong>
+                                ${exp.date ? `<div class="modern-date">${exp.date}</div>` : ''}
+                            </div>
+                            ${exp.organization ? `<div class="modern-subtitle">${exp.organization}</div>` : ''}
+                            ${exp.description ? `<div class="modern-description">${exp.description}</div>` : ''}
+                        </div>
+                    `;
+                });
+            }
+
+            html += '</div>';
+        }
 
         // 工作经历
         html += this._renderSection(resume.experience, 'experience', '工作经历', (exp) => `
@@ -199,13 +253,13 @@ const ResumeTemplates = {
         html += this._renderSection(resume.projects, 'projects', '项目经验', (proj) => `
             <div class="modern-item">
                 <strong>${proj.name || ''}</strong>
-                ${proj.description ? `<div class="modern-desc">${proj.description}</div>` : ''}
+                ${proj.description ? `<div class="modern-desc">${this._boldPrefix(proj.description)}</div>` : ''}
                 ${proj.tech_stack && proj.tech_stack.length > 0 ? `
                     <div class="modern-tech">${proj.tech_stack.map(t => `<span class="modern-tech-tag">${t}</span>`).join('')}</div>
                 ` : ''}
                 ${proj.highlights && proj.highlights.length > 0 ? `
                     <ul class="modern-highlights">
-                        ${proj.highlights.map(h => `<li>${h}</li>`).join('')}
+                        ${proj.highlights.map(h => `<li>${this._boldPrefix(h)}</li>`).join('')}
                     </ul>
                 ` : ''}
             </div>
@@ -235,15 +289,41 @@ const ResumeTemplates = {
             </div>
         `;
 
-        // 教育背景
-        html += this._renderSection(resume.education, 'education', '教育背景', (edu) => `
-            <div class="minimal-item">
-                <div class="minimal-line">
-                    <strong>${edu.school}</strong>, ${edu.major || ''}${edu.degree ? ` (${edu.degree})` : ''}
-                    <span class="minimal-date">${this._formatDateRange(edu.start_date, edu.end_date)}</span>
-                </div>
-            </div>
-        `, 'minimal-section');
+        // 教育背景（包含校园经历）
+        if ((resume.education && resume.education.length > 0) || (resume.campus_experience && resume.campus_experience.length > 0)) {
+            html += '<div class="minimal-section"><h2>教育背景</h2>';
+
+            // 教育经历
+            if (resume.education && resume.education.length > 0) {
+                resume.education.forEach(edu => {
+                    html += `
+                        <div class="minimal-item">
+                            <div class="minimal-line">
+                                <strong>${edu.school}</strong>, ${edu.major || ''}${edu.degree ? ` (${edu.degree})` : ''}
+                                <span class="minimal-date">${this._formatDateRange(edu.start_date, edu.end_date)}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            // 校园经历（无单独标题）
+            if (resume.campus_experience && resume.campus_experience.length > 0) {
+                resume.campus_experience.forEach(exp => {
+                    html += `
+                        <div class="minimal-item">
+                            <div class="minimal-line">
+                                <strong>${exp.title || ''}</strong>${exp.organization ? `, ${exp.organization}` : ''}
+                                ${exp.date ? `<span class="minimal-date">${exp.date}</span>` : ''}
+                            </div>
+                            ${exp.description ? `<div class="minimal-description">${exp.description}</div>` : ''}
+                        </div>
+                    `;
+                });
+            }
+
+            html += '</div>';
+        }
 
         // 技能特长
         if (resume.skills && resume.skills.length > 0) {
@@ -251,7 +331,7 @@ const ResumeTemplates = {
                 <div class="minimal-section">
                     <h2>技能特长</h2>
                     <ul class="minimal-skills-list">
-                        ${resume.skills.map(skill => `<li>${skill}</li>`).join('')}
+                        ${resume.skills.map(skill => `<li>${this._boldPrefix(skill)}</li>`).join('')}
                     </ul>
                 </div>
             `;
@@ -272,13 +352,13 @@ const ResumeTemplates = {
         html += this._renderSection(resume.projects, 'projects', '项目经验', (proj) => `
             <div class="minimal-item">
                 <div class="minimal-line"><strong>${proj.name}</strong></div>
-                ${proj.description ? `<div class="minimal-desc">${proj.description}</div>` : ''}
+                ${proj.description ? `<div class="minimal-desc">${this._boldPrefix(proj.description)}</div>` : ''}
                 ${proj.tech_stack && proj.tech_stack.length > 0 ? `
-                    <div class="minimal-tech">技术: ${proj.tech_stack.join(', ')}</div>
+                    <div class="minimal-tech"><strong>技术:</strong> ${proj.tech_stack.join(', ')}</div>
                 ` : ''}
                 ${proj.highlights && proj.highlights.length > 0 ? `
                     <ul class="minimal-highlights">
-                        ${proj.highlights.map(h => `<li>${h}</li>`).join('')}
+                        ${proj.highlights.map(h => `<li>${this._boldPrefix(h)}</li>`).join('')}
                     </ul>
                 ` : ''}
             </div>
@@ -334,6 +414,28 @@ const ResumeTemplates = {
             return `${parts[0]}.${parts[1]}`;
         }
         return dateStr;
+    },
+
+    // 加粗冒号前的内容或前缀词
+    _boldPrefix(text) {
+        if (!text) return '';
+
+        // 如果包含冒号或：，加粗冒号前的内容
+        if (text.includes('：') || text.includes(':')) {
+            const colonChar = text.includes('：') ? '：' : ':';
+            const parts = text.split(colonChar);
+            return `<strong>${parts[0]}</strong>${colonChar}${parts.slice(1).join(colonChar)}`;
+        }
+
+        // 如果以"熟悉"、"掌握"等开头，加粗这些词
+        const match = text.match(/^(熟悉|掌握|了解|精通|擅长|熟练)/);
+        if (match) {
+            const prefix = match[1];
+            const rest = text.substring(prefix.length);
+            return `<strong>${prefix}</strong>${rest}`;
+        }
+
+        return text;
     },
 
     // 智能优化技能描述：将关键词转换为完整句子
